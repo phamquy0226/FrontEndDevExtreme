@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEndDevExtreme", "FrontEndDevExtreme\FrontEndDevExtreme.csproj", "{495AFE92-3429-4EE3-8B4B-4B3514A573ED}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevExtreme NuGet.config", "DevExtreme NuGet.config", "{A0DD5D4F-4D54-45F4-9C46-FCC8D04DC702}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{495AFE92-3429-4EE3-8B4B-4B3514A573ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{495AFE92-3429-4EE3-8B4B-4B3514A573ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{495AFE92-3429-4EE3-8B4B-4B3514A573ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{495AFE92-3429-4EE3-8B4B-4B3514A573ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

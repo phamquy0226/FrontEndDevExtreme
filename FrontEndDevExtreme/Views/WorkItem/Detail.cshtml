@@ -1,0 +1,108 @@
+﻿@model FrontEndDevExtreme.Models.WorkItemDetailModel
+
+@{
+    ViewData["Title"] = "Chi tiết công việc";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card p-3">
+    <dl class="row">
+        <dt class="col-sm-3">Tên công việc</dt>
+        <dd class="col-sm-9">@Model.TaskName</dd>
+
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">
+            @{
+                var statusText = Model.Status switch
+                {
+                    0 => "Chưa thực hiện",
+                    1 => "Đang thực hiện",
+                    2 => "Đã xong",
+                    _ => "Không xác định"
+                };
+            }
+            @statusText
+        </dd>
+
+        <dt class="col-sm-3">Tiến độ</dt>
+        <dd class="col-sm-9">@Model.Progress%</dd>
+
+        <dt class="col-sm-3">Loại công việc</dt>
+        <dd class="col-sm-9">@Model.TaskType</dd>
+
+        <dt class="col-sm-3">Độ ưu tiên</dt>
+        <dd class="col-sm-9">
+            @{
+                var priorityText = Model.Priority switch
+                {
+                    1 => "Thấp",
+                    2 => "Trung bình",
+                    3 => "Cao",
+                    _ => "Không xác định"
+                };
+                var priorityClass = Model.Priority switch
+                {
+                    1 => "badge bg-success text-white",
+                    2 => "badge bg-warning text-dark",
+                    3 => "badge bg-danger text-white",
+                    _ => "badge bg-secondary"
+                };
+            }
+            <span class="@priorityClass">@priorityText</span>
+        </dd>
+
+        <dt class="col-sm-3">Ghim</dt>
+        <dd class="col-sm-9">@((Model.IsPinned) ? "Có" : "Không")</dd>
+
+        <dt class="col-sm-3">Ngày bắt đầu</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Ngày kết thúc</dt>
+        <dd class="col-sm-9">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Người giao việc</dt>
+        <dd class="col-sm-9">@Model.AssignerName</dd>
+
+        <dt class="col-sm-3">Phòng ban nhận</dt>
+        <dd class="col-sm-9">
+            @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+            {
+                <div>@dept</div>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Người nhận</dt>
+        <dd class="col-sm-9">
+            @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+            {
+                <div>@user</div>
+            }
+        </dd>
+    </dl>
+
+    <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary">Quay lại danh sách</a>
+</div>
+
+<hr />
+
+<h4>Ghi chú</h4>
+<ul>
+    @foreach (var note in Model.Notes)
+    {
+        <li>
+            <strong>@note.CreatedDate.ToString("dd/MM/yyyy HH:mm"):</strong> @note.Content
+            <form asp-action="DeleteNote" method="post" style="display:inline">
+                <input type="hidden" name="noteId" value="@note.NoteID" />
+                <input type="hidden" name="workItemId" value="@Model.WorkItemID" />
+                <button type="submit" class="btn btn-sm btn-danger">Xoá</button>
+            </form>
+        </li>
+    }
+</ul>
+
+<form asp-action="AddNote" method="post">
+    <input type="hidden" name="WorkItemID" value="@Model.WorkItemID" />
+    <textarea name="Content" class="form-control" placeholder="Thêm ghi chú mới..."></textarea>
+    <button type="submit" class="btn btn-primary mt-2">Thêm ghi chú</button>
+</form>

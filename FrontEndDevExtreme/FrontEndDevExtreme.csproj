@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.AspNetCore.ProjectTemplates" Version="24.2.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="DevExtreme.AspNet.Core" Version="24.2.7" />
+    <PackageReference Include="DevExtreme.AspNet.Data" Version="5.0.0" />
+  </ItemGroup>
+</Project>

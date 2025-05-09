@@ -1,0 +1,3 @@
+﻿@using FrontEndDevExtreme
+@using FrontEndDevExtreme.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
