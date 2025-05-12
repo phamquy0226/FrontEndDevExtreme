@@ -104,7 +104,6 @@
             </div>
         </div>
         <ul id="department-list" class="mt-2"></ul>
-        <input type="hidden" id="DepartmentIDs" name="DepartmentIDs" value="" />
     </div>
 
     <div class="form-group">
@@ -122,7 +121,6 @@
             </div>
         </div>
         <ul id="user-list" class="mt-2"></ul>
-        <input type="hidden" id="UserIDs" name="UserIDs" value="" />
     </div>
 
     <button type="submit" class="btn btn-primary">Tạo mới</button>
@@ -130,8 +128,6 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
     <script>
         var selectedDepartments = [];
         var selectedUsers = [];
@@ -141,19 +137,18 @@
             var text = $("#SelectedDepartmentID option:selected").text();
             if (selected && !selectedDepartments.includes(selected)) {
                 selectedDepartments.push(selected);
-                $("#department-list").append(`<li data-id="${selected}">${text} <a href="#" onclick="removeDepartment('${selected}'); return false;">[x]</a></li>`);
-                updateHiddenDepartmentInput();
+                $("#department-list").append(
+                    `<li data-id="${selected}">
+                        ${text}
+                        <a href="#" onclick="removeDepartment('${selected}'); return false;">[x]</a>
+                        <input type="hidden" name="DepartmentIDs" value="${selected}" />
+                    </li>`);
             }
         }
 
         function removeDepartment(id) {
             selectedDepartments = selectedDepartments.filter(x => x !== id);
             $(`#department-list li[data-id='${id}']`).remove();
-            updateHiddenDepartmentInput();
-        }
-
-        function updateHiddenDepartmentInput() {
-            $("#DepartmentIDs").val(selectedDepartments.join(","));
         }
 
         function addUser() {
@@ -161,20 +156,18 @@
             var text = $("#SelectedUserID option:selected").text();
             if (selected && !selectedUsers.includes(selected)) {
                 selectedUsers.push(selected);
-                $("#user-list").append(`<li data-id="${selected}">${text} <a href="#" onclick="removeUser('${selected}'); return false;">[x]</a></li>`);
-                updateHiddenUserInput();
+                $("#user-list").append(
+                    `<li data-id="${selected}">
+                        ${text}
+                        <a href="#" onclick="removeUser('${selected}'); return false;">[x]</a>
+                        <input type="hidden" name="UserIDs" value="${selected}" />
+                    </li>`);
             }
         }
 
         function removeUser(id) {
             selectedUsers = selectedUsers.filter(x => x !== id);
             $(`#user-list li[data-id='${id}']`).remove();
-            updateHiddenUserInput();
-        }
-
-        function updateHiddenUserInput() {
-            $("#UserIDs").val(selectedUsers.join(","));
         }
     </script>
 }
-

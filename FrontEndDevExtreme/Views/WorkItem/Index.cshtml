@@ -212,14 +212,24 @@
                 .FalseText("Không");
             columns.AddFor(m => m.StartDate).Caption("Bắt đầu").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
             columns.AddFor(m => m.EndDate).Caption("Kết thúc").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
-            columns.Add()
-                .Caption("Thao tác")
-                .AllowFiltering(false)
-                .AllowSorting(false)
-                .CellTemplate(@<text>
-                    <a href="@Url.Action("Detail", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-info">Chi tiết</a>
-                    <a href="@Url.Action("Edit", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-warning">Chỉnh sửa</a>
-                </text>);
+                columns.Add()
+            .Caption("Thao tác")
+            .AllowFiltering(false)
+            .AllowSorting(false)
+            .CellTemplate(@<text>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-info"
+                    onclick="location.href='@Url.Action("Detail", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
+                Chi tiết
+            </button>
+            <button class="btn btn-sm btn-warning"
+                    onclick="location.href='@Url.Action("Edit", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
+                Chỉnh sửa
+            </button>
+        </div>
+    </text>);
+
+
         })
     )
 </div>

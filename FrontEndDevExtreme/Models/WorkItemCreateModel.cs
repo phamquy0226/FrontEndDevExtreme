@@ -18,6 +18,7 @@
         public int SelectedUserID { get; set; } 
         public List<int> UserIDs { get; set; } = new();
         public int Priority { get; set; }
+       
     }
 
 }

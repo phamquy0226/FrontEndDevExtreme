@@ -62,10 +62,10 @@ namespace FrontEndDevExtreme.Controllers
                 });
             }
 
-            var result = await _workItemApiService.CreateAsync(model); // result là bool
+            var result = await _workItemApiService.CreateAsync(model);
             if (result)
             {
-                return Json(new { success = true, redirectUrl = Url.Action("Index") });
+                return RedirectToAction("Index", "WorkItem");
             }
 
             return Json(new { success = false, message = "Tạo công việc thất bại. Vui lòng thử lại." });
@@ -106,6 +106,7 @@ namespace FrontEndDevExtreme.Controllers
                 return Json(new { success = false, message = "Có lỗi khi thêm ghi chú." });
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteNote(int noteId, int workitemid) // Chỉ cần noteId để xóa

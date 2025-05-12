@@ -1,106 +1,165 @@
 ﻿@model FrontEndDevExtreme.Models.WorkItemDetailModel
 
-<div class="card">
-    <div class="card-header">
-        Ghi chú
-    </div>
-    <div class="card-body">
-        <div id="notesList">
-            @if (Model.Notes != null && Model.Notes.Any())
-            {
-                @foreach (var note in Model.Notes)
+@{
+    ViewData["Title"] = "Chi tiết công việc";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card p-3">
+    <dl class="row">
+        <dt class="col-sm-3">Tên công việc</dt>
+        <dd class="col-sm-9">@Model.TaskName</dd>
+
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">
+            @{
+                var statusText = Model.Status switch
                 {
-                    <div class="note-item mb-2 p-2 border rounded">
-                        <p><strong>Ngày tạo:</strong> @note.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
-                        <p>@note.Content</p>
-                        <button class="btn btn-sm btn-danger delete-note-btn" data-note-id="@note.NoteID" data-workitem-id="@Model.WorkItemID">Xóa</button>
-                    </div>
-                }
+                    0 => "Chưa thực hiện",
+                    1 => "Đang thực hiện",
+                    2 => "Đã xong",
+                    _ => "Không xác định"
+                };
             }
-            else
+            @statusText
+        </dd>
+
+        <dt class="col-sm-3">Tiến độ</dt>
+        <dd class="col-sm-9">@Model.Progress%</dd>
+
+        <dt class="col-sm-3">Loại công việc</dt>
+        <dd class="col-sm-9">@Model.TaskType</dd>
+
+        <dt class="col-sm-3">Độ ưu tiên</dt>
+        <dd class="col-sm-9">
+            @{
+                var priorityText = Model.Priority switch
+                {
+                    1 => "Thấp",
+                    2 => "Trung bình",
+                    3 => "Cao",
+                    _ => "Không xác định"
+                };
+                var priorityClass = Model.Priority switch
+                {
+                    1 => "badge bg-success text-white",
+                    2 => "badge bg-warning text-dark",
+                    3 => "badge bg-danger text-white",
+                    _ => "badge bg-secondary"
+                };
+            }
+            <span class="@priorityClass">@priorityText</span>
+        </dd>
+
+        <dt class="col-sm-3">Ghim</dt>
+        <dd class="col-sm-9">@((Model.IsPinned) ? "Có" : "Không")</dd>
+
+        <dt class="col-sm-3">Ngày bắt đầu</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Ngày kết thúc</dt>
+        <dd class="col-sm-9">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Người giao việc</dt>
+        <dd class="col-sm-9">@Model.AssignerName</dd>
+
+        <dt class="col-sm-3">Phòng ban nhận</dt>
+        <dd class="col-sm-9">
+            @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
             {
-                <p>Không có ghi chú nào.</p>
+                <div>@dept</div>
             }
-        </div>
-        <div class="form-group mt-3">
-            <textarea id="newNoteContent" class="form-control" placeholder="Nhập ghi chú mới..."></textarea>
-        </div>
-        <button id="addNoteBtn" class="btn btn-primary">Thêm ghi chú</button>
-    </div>
+        </dd>
+
+        <dt class="col-sm-3">Người nhận</dt>
+        <dd class="col-sm-9">
+            @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+            {
+                <div>@user</div>
+            }
+        </dd>
+    </dl>
+
+    <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary">Quay lại danh sách</a>
 </div>
 
-<script>
-    $(document).ready(function () {
-        var workItemId = @Model.WorkItemID; // Lấy WorkItemID từ model
+<hr />
 
-        // Hàm để thêm ghi chú bằng AJAX
-        $("#addNoteBtn").click(function () {
-            var noteContent = $("#newNoteContent").val();
-            if (noteContent.trim() !== "") {
-                $.ajax({
-                    url: '/api/workitems/' + workItemId + '/notes', // Sử dụng route có workItemId
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        workItemId: workItemId, // Đã có trong biến workItemId
-                        content: noteContent
-                    }),
-                    success: function (response) {
-                        if (response.success) {
-                            // Thêm ghi chú mới vào danh sách hiển thị
-                            var newNoteHtml = `<div class="note-item mb-2 p-2 border rounded">
-                                                <p><strong>Ngày tạo:</strong> ${formatDate(response.data.createdDate)}</p>
-                                                <p>${response.data.content}</p>
-                                                <button class="btn btn-sm btn-danger delete-note-btn" data-note-id="${response.data.noteID}" data-workitem-id="${workItemId}">Xóa</button>
-                                              </div>`;
-                            $("#notesList").append(newNoteHtml);
-                            $("#newNoteContent").val(""); // Xóa nội dung textarea
-                            toastr.success("Thêm ghi chú thành công!"); // Sử dụng thư viện toastr để hiển thị thông báo
-                        } else {
-                            toastr.error("Lỗi: " + response.message);
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Lỗi khi thêm ghi chú.");
-                    }
-                });
-            } else {
-                toastr.warning("Vui lòng nhập nội dung ghi chú.");
+<h4>Ghi chú</h4>
+
+<!-- DevExtreme List để hiển thị ghi chú -->
+@(Html.DevExtreme().List()
+    .ID("noteList")
+    .DataSource(Model.Notes.Select(note => new
+    {
+        ID = note.NoteID,
+        Text = $"{note.CreatedDate:dd/MM/yyyy HH:mm}: {note.Content}"
+    }))
+    .DisplayExpr("Text")
+    .KeyExpr("ID")
+    .SelectionMode(ListSelectionMode.None)
+    .ShowScrollbar(DevExtreme.AspNet.Mvc.ShowScrollbarMode.Always)
+)
+
+<!-- TextArea để người dùng nhập ghi chú mới -->
+<div class="mt-3">
+    @(Html.DevExtreme().TextArea()
+        .ID("noteContent")
+        .Height(120)
+        .Placeholder("Thêm ghi chú mới..."))
+</div>
+
+<!-- Nút Thêm Ghi Chú -->
+<div class="mt-2">
+    @(Html.DevExtreme().Button()
+        .Text("Thêm ghi chú")
+        .Type(ButtonType.Success)
+        .OnClick("addNote"))
+</div>
+
+@section Scripts {
+    <script>
+        // Hàm thêm ghi chú
+        function addNote() {
+            const content = $("#noteContent").dxTextArea("instance").option("value");
+            if (!content || content.trim() === "") {
+                DevExpress.ui.notify("Vui lòng nhập nội dung ghi chú", "warning", 2000);
+                return;
             }
-        });
 
-        // Hàm để xóa ghi chú bằng AJAX
-        $(document).on('click', '.delete-note-btn', function () {
-            var noteId = $(this).data('note-id');
-             var workItemId = $(this).data('workitem-id'); // Get workItemId from the button
-            var noteItem = $(this).closest('.note-item');
+            // Gửi yêu cầu POST đến API
+            $.post('@Url.Action("AddNote", "WorkItem")', {
+                workItemId: @Model.WorkItemID,
+                content: content
+            }).done(function (res) {
+                if (res.success) {
+                    DevExpress.ui.notify("Đã thêm ghi chú", "success", 2000);
 
-            $.ajax({
-                url: '/api/workitems/' + workItemId + '/notes/' + noteId, // Use the correct route
-                type: 'DELETE',
-                success: function (response) {
-                    if (response.success) {
-                        noteItem.remove(); // Xóa phần tử ghi chú khỏi DOM
-                        toastr.success("Xóa ghi chú thành công!");
-                    } else {
-                        toastr.error("Lỗi: " + response.message);
-                    }
-                },
-                error: function () {
-                    toastr.error("Lỗi khi xóa ghi chú.");
+                    // Lấy ghi chú mới thêm từ phản hồi
+                    var newNote = res.data;
+
+                    // Lấy đối tượng dxList và cập nhật lại DataSource
+                    var noteList = $("#noteList").dxList("instance");
+                    var currentDataSource = noteList.option("dataSource");
+
+                    // Thêm ghi chú mới vào đầu danh sách
+                    currentDataSource.unshift(newNote);  // Thêm vào đầu danh sách
+
+                    // Cập nhật lại DataSource của List để hiển thị ghi chú mới
+                    noteList.option("dataSource", currentDataSource);
+
+                    // Làm mới giao diện của List để hiển thị ghi chú mới
+                    noteList.refresh();
+
+                    // Xóa nội dung TextArea sau khi thêm ghi chú
+                    $("#noteContent").dxTextArea("instance").option("value", "");
+                } else {
+                    DevExpress.ui.notify(res.message || "Thêm ghi chú thất bại", "error", 2000);
                 }
+            }).fail(function () {
+                DevExpress.ui.notify("Lỗi khi gọi API", "error", 2000);
             });
-        });
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            var date = new Date(dateString);
-            var day = date.getDate().toString().padStart(2, '0');
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var year = date.getFullYear();
-            var hours = date.getHours().toString().padStart(2, '0');
-            var minutes = date.getMinutes().toString().padStart(2, '0');
-            return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
         }
-    });
-</script>
+    </script>
+}
