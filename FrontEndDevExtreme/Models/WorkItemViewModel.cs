@@ -14,6 +14,7 @@
         public string DepartmentList { get; set; }
         public string UserList { get; set; }
         public int Priority { get; set; }
+        public List<NoteModel> Notes { get; set; } = new List<NoteModel>();
     }
 
 }

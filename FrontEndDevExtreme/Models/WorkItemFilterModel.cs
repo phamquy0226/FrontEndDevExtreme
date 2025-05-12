@@ -13,6 +13,7 @@
         public string? SearchTaskName { get; set; }
         public int? Priority { get; set; }
         public bool? IsPinned { get; set; }
+        public List<NoteModel> Notes { get; set; } = new List<NoteModel>();
     }
 
 }
