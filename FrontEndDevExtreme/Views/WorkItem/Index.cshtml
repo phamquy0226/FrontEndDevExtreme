@@ -9,81 +9,106 @@
 <form method="get" class="mb-4">
     <div class="row g-2">
         <div class="col-md-2">
-            <input name="SearchTaskName" class="form-control" placeholder="Tên công việc"
-                   value="@currentQuery["SearchTaskName"]" />
-        </div>
+            @(Html.DevExtreme().TextBox()
+                .Name("SearchTaskName")
+                .Placeholder("Tên công việc")
+                .Value(Context.Request.Query["SearchTaskName"].ToString())
+                .ShowClearButton(true))
 
-
-        <div class="col-md-2">
-            <select name="UserName" class="form-control">
-                <option value="">-- Người thực hiện --</option>
-                @foreach (var user in ViewBag.Assigned)
-                {
-                    <option value="@user.UserName" selected="@(currentQuery["UserName"] == user.UserName)">
-                        @user.UserName
-                    </option>
-                }
-            </select>
-        </div>
-
-
-        <div class="col-md-2">
-            <select name="AssignerName" class="form-control">
-                <option value="">-- Người giao --</option>
-                @foreach (var user in ViewBag.Assigner)
-                {
-                    <option value="@user.UserName" selected="@(currentQuery["AssignerName"] == user.UserName)">
-                        @user.UserName
-                    </option>
-                }
-            </select>
-        </div>
-
-
-        <div class="col-md-2">
-            <select name="Status" class="form-control">
-                <option value="">-- Trạng thái --</option>
-                <option value="0" selected="@(currentQuery["Status"] == "0")">Chưa thực hiện</option>
-                <option value="1" selected="@(currentQuery["Status"] == "1")">Đang thực hiện</option>
-                <option value="2" selected="@(currentQuery["Status"] == "2")">Đã xong</option>
-            </select>
         </div>
 
         <div class="col-md-2">
-            <select name="Priority" class="form-control">
-                <option value="">-- Độ ưu tiên --</option>
-                <option value="1" selected="@(currentQuery["Priority"] == "1")">Thấp</option>
-                <option value="2" selected="@(currentQuery["Priority"] == "2")">Trung bình</option>
-                <option value="3" selected="@(currentQuery["Priority"] == "3")">Cao</option>
-            </select>
+            @(Html.DevExtreme().SelectBox()
+                .Name("UserName")
+                .DataSource(ViewBag.Assigned)
+                .ValueExpr("UserName")
+                .DisplayExpr("UserName")
+                .ShowClearButton(true)
+                .Placeholder("Người thực hiện")
+                .Value(Context.Request.Query["UserName"].ToString()))
         </div>
 
         <div class="col-md-2">
-            <select name="IsPinned" class="form-control">
-                <option value="">-- Ghim? --</option>
-                <option value="true" selected="@(currentQuery["IsPinned"] == "true")">Có</option>
-                <option value="false" selected="@(currentQuery["IsPinned"] == "false")">Không</option>
-            </select>
+            @(Html.DevExtreme().SelectBox()
+                .Name("AssignerName")
+                .DataSource(ViewBag.Assigner)
+                .ValueExpr("UserName")
+                .DisplayExpr("UserName")
+                .ShowClearButton(true)
+                .Placeholder("Người giao")
+                .Value(Context.Request.Query["AssignerName"].ToString()))
         </div>
 
         <div class="col-md-2">
-            <input type="date" name="StartDateFrom" class="form-control" value="@currentQuery["StartDateFrom"]" />
-        </div>
-        <div class="col-md-2">
-            <input type="date" name="EndDateTo" class="form-control" value="@currentQuery["EndDateTo"]" />
+            @(Html.DevExtreme().SelectBox()
+                .Name("Status")
+                .DataSource(new[] {
+            new { ID = "0", Name = "Chưa thực hiện" },
+            new { ID = "1", Name = "Đang thực hiện" },
+            new { ID = "2", Name = "Đã xong" }
+            })
+                .ValueExpr("ID")
+                .DisplayExpr("Name")
+                .ShowClearButton(true)
+                .Placeholder("Trạng thái")
+                .Value(Context.Request.Query["Status"].ToString()))
         </div>
 
+        <div class="col-md-2">
+            @(Html.DevExtreme().SelectBox()
+                .Name("Priority")
+                .DataSource(new[] {
+            new { ID = "1", Name = "Thấp" },
+            new { ID = "2", Name = "Trung bình" },
+            new { ID = "3", Name = "Cao" }
+            })
+                .ValueExpr("ID")
+                .DisplayExpr("Name")
+                .ShowClearButton(true)
+                .Placeholder("Độ ưu tiên")
+                .Value(Context.Request.Query["Priority"].ToString()))
+        </div>
 
         <div class="col-md-2">
-            <select name="DepartmentID" class="form-control">
-                <option value="">-- Phòng ban --</option>
-                @foreach (var dept in ViewBag.Departments)
-                {
-                    <option value="@dept.DepartmentID" selected="@(currentQuery["DepartmentID"] == dept.DepartmentID)">
-                        @dept.DepartmentName
-                    </option>
-                }
-            </select>
+            @(Html.DevExtreme().SelectBox()
+                .Name("IsPinned")
+                .DataSource(new[] {
+            new { ID = "true", Name = "Có" },
+            new { ID = "false", Name = "Không" }
+            })
+                .ValueExpr("ID")
+                .DisplayExpr("Name")
+                .Placeholder("Ghim?")
+                .ShowClearButton(true)
+                .Value(Context.Request.Query["IsPinned"].ToString()))
+        </div>
+
+        <div class="col-md-2">
+            @(Html.DevExtreme().DateBox()
+                .Name("StartDateFrom")
+                .Placeholder("Từ ngày")
+                .ShowClearButton(true)
+                .Value(Context.Request.Query["StartDateFrom"].ToString()))
+        </div>
+
+        <div class="col-md-2">
+            @(Html.DevExtreme().DateBox()
+                .Name("EndDateTo")
+                .Placeholder("Đến ngày")
+                .ShowClearButton(true)
+                .Value(Context.Request.Query["EndDateTo"].ToString()))
+        </div>
+
+        <div class="col-md-2">
+            @(Html.DevExtreme().SelectBox()
+                .Name("DepartmentID")
+                .DataSource(ViewBag.Departments)
+                .ValueExpr("DepartmentID")
+                .DisplayExpr("DepartmentName")
+                .ShowClearButton(true)
+                .Placeholder("Phòng ban")
+                .Value(currentQuery.ContainsKey("DepartmentID") ? currentQuery["DepartmentID"].ToString() : null)
+                )
         </div>
 
 
@@ -97,104 +122,104 @@
 
 <div id="gridContainer">
     @(Html.DevExtreme().DataGrid<FrontEndDevExtreme.Models.WorkItemViewModel>()
-            .ID("workItemGrid")
-            .DataSource(Model)
-            .ShowBorders(true)
-            .Paging(p => p.PageSize(15))
-            .Pager(pager =>
-            {
-                pager.ShowPageSizeSelector(true);
-                pager.AllowedPageSizes(new[] { 5, 10, 20 });
-                pager.ShowInfo(true);
-            })
-            .FilterPanel(f => f.Visible(true))
-            .SearchPanel(s => s.Visible(true))
-            .GroupPanel(g => g.Visible(true))
-            .Grouping(g => g.AutoExpandAll(false))
-            .Columns(columns =>
-            {
-                columns.AddFor(m => m.TaskName).Caption("Tên công việc");
-                columns.AddFor(m => m.UserList)
-            .Caption("Người thực hiện")
-            .CellTemplate(@<text>
-        <% if (data.UserList) { %>
-        <% data.UserList.split(',').forEach(function(user) { %>
-        <div><%= user.trim() %></div>
-        <% }); %>
-        <% } %>
-    </text>);
-                columns.AddFor(m => m.DepartmentList)
-            .Caption("Phòng ban nhận")
-            .CellTemplate(@<text>
-        <% if (data.DepartmentList) { %>
-        <% data.DepartmentList.split(',').forEach(function(dept) { %>
-        <div><%= dept.trim() %></div>
-        <% }); %>
-        <% } %>
-    </text>);
-                columns.AddFor(m => m.AssignerName).Caption("Người giao");
-                columns.AddFor(m => m.Priority)
-            .Caption("Độ ưu tiên")
-            .Lookup(lookup => lookup
-            .DataSource(new JS("[{ value: 1, text: 'Thấp' }, { value: 2, text: 'Trung bình' }, { value: 3, text: 'Cao' }]"))
-            .ValueExpr("value")
-            .DisplayExpr("text")
-            )
-            .CellTemplate(@<text>
-        <% if (data.Priority === 1) { %>
-        <span class='badge bg-success text-white'>Thấp</span>
-        <% } else if (data.Priority === 2) { %>
-        <span class='badge bg-warning text-dark'>Trung bình</span>
-        <% } else if (data.Priority === 3) { %>
-        <span class='badge bg-danger text-white'>Cao</span>
-        <% } else { %>
-        <span>Không xác định</span>
-        <% } %>
-    </text>);
-                columns.AddFor(m => m.Status)
-            .Caption("Trạng thái")
-            .Lookup(lookup => lookup
-            .DataSource(new JS("[{ value: 0, text: 'Chưa thực hiện' }, { value: 1, text: 'Đang thực hiện' }, { value: 2, text: 'Đã xong' }]"))
-            .ValueExpr("value")
-            .DisplayExpr("text")
-            )
-            .CellTemplate(@<text>
-        <% if (data.Status === 0) { %>
-        <span class='badge bg-secondary'>Chưa thực hiện</span>
-        <% } else if (data.Status === 1) { %>
-        <span class='badge bg-warning text-dark'>Đang thực hiện</span>
-        <% } else if (data.Status === 2) { %>
-        <span class='badge bg-success'>Đã xong</span>
-        <% } else { %>
-        <span>Không xác định</span>
-        <% } %>
-    </text>);
-                columns.AddFor(m => m.Progress)
-            .Caption("Tiến độ")
-            .CellTemplate(@<text>
-        <div class='progress' style='height: 20px;'>
-            <div class='progress-bar bg-info' role='progressbar'
-                 style='width: <%= data.Progress %>%;' aria-valuenow='<%= data.Progress %>'
-                 aria-valuemin='0' aria-valuemax='100'>
-                <%= data.Progress %>%
-            </div>
-        </div>
-    </text>);
-                columns.AddFor(m => m.IsPinned)
-            .Caption("Ghim?")
-            .DataType(GridColumnDataType.Boolean)
-            .TrueText("Có")
-            .FalseText("Không");
-                columns.AddFor(m => m.StartDate).Caption("Bắt đầu").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
-                columns.AddFor(m => m.EndDate).Caption("Kết thúc").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
-                columns.Add()
-            .Caption("Thao tác")
-            .AllowFiltering(false)
-            .AllowSorting(false)
-            .CellTemplate(@<text>
-        <a href="@Url.Action("Detail", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-info">Chi tiết</a>
-        <a href="@Url.Action("Edit", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-warning">Chỉnh sửa</a>
-    </text>);
-            })
-        )
+        .ID("workItemGrid")
+        .DataSource(Model)
+        .ShowBorders(true)
+        .Paging(p => p.PageSize(5))
+        .Pager(pager =>
+        {
+            pager.ShowPageSizeSelector(true);
+            pager.AllowedPageSizes(new[] { 5, 10, 20 });
+            pager.ShowInfo(true);
+        })
+        .FilterPanel(f => f.Visible(true))
+        .SearchPanel(s => s.Visible(true))
+        .GroupPanel(g => g.Visible(true))
+        .Grouping(g => g.AutoExpandAll(false))
+        .Columns(columns =>
+        {
+            columns.AddFor(m => m.TaskName).Caption("Tên công việc");
+            columns.AddFor(m => m.UserList)
+                .Caption("Người thực hiện")
+                .CellTemplate(@<text>
+                    <% if (data.UserList) { %>
+                        <% data.UserList.split(',').forEach(function(user) { %>
+                            <div><%= user.trim() %></div>
+                        <% }); %>
+                    <% } %>
+                </text>);
+            columns.AddFor(m => m.DepartmentList)
+                .Caption("Phòng ban nhận")
+                .CellTemplate(@<text>
+                    <% if (data.DepartmentList) { %>
+                        <% data.DepartmentList.split(',').forEach(function(dept) { %>
+                            <div><%= dept.trim() %></div>
+                        <% }); %>
+                    <% } %>
+                </text>);
+            columns.AddFor(m => m.AssignerName).Caption("Người giao");
+            columns.AddFor(m => m.Priority)
+                .Caption("Độ ưu tiên")
+                .Lookup(lookup => lookup
+                    .DataSource(new JS("[{ value: 1, text: 'Thấp' }, { value: 2, text: 'Trung bình' }, { value: 3, text: 'Cao' }]"))
+                    .ValueExpr("value")
+                    .DisplayExpr("text")
+                )
+                .CellTemplate(@<text>
+                    <% if (data.Priority === 1) { %>
+                        <span class='badge bg-success text-white'>Thấp</span>
+                    <% } else if (data.Priority === 2) { %>
+                        <span class='badge bg-warning text-dark'>Trung bình</span>
+                    <% } else if (data.Priority === 3) { %>
+                        <span class='badge bg-danger text-white'>Cao</span>
+                    <% } else { %>
+                        <span>Không xác định</span>
+                    <% } %>
+                </text>);
+            columns.AddFor(m => m.Status)
+                .Caption("Trạng thái")
+                .Lookup(lookup => lookup
+                    .DataSource(new JS("[{ value: 0, text: 'Chưa thực hiện' }, { value: 1, text: 'Đang thực hiện' }, { value: 2, text: 'Đã xong' }]"))
+                    .ValueExpr("value")
+                    .DisplayExpr("text")
+                )
+                .CellTemplate(@<text>
+                    <% if (data.Status === 0) { %>
+                        <span class='badge bg-secondary'>Chưa thực hiện</span>
+                    <% } else if (data.Status === 1) { %>
+                        <span class='badge bg-warning text-dark'>Đang thực hiện</span>
+                    <% } else if (data.Status === 2) { %>
+                        <span class='badge bg-success'>Đã xong</span>
+                    <% } else { %>
+                        <span>Không xác định</span>
+                    <% } %>
+                </text>);
+            columns.AddFor(m => m.Progress)
+                .Caption("Tiến độ")
+                .CellTemplate(@<text>
+                    <div class='progress' style='height: 20px;'>
+                        <div class='progress-bar bg-info' role='progressbar'
+                             style='width: <%= data.Progress %>%;' aria-valuenow='<%= data.Progress %>'
+                             aria-valuemin='0' aria-valuemax='100'>
+                            <%= data.Progress %>%
+                        </div>
+                    </div>
+                </text>);
+            columns.AddFor(m => m.IsPinned)
+                .Caption("Ghim?")
+                .DataType(GridColumnDataType.Boolean)
+                .TrueText("Có")
+                .FalseText("Không");
+            columns.AddFor(m => m.StartDate).Caption("Bắt đầu").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
+            columns.AddFor(m => m.EndDate).Caption("Kết thúc").DataType(GridColumnDataType.Date).Format("dd/MM/yyyy");
+            columns.Add()
+                .Caption("Thao tác")
+                .AllowFiltering(false)
+                .AllowSorting(false)
+                .CellTemplate(@<text>
+                    <a href="@Url.Action("Detail", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-info">Chi tiết</a>
+                    <a href="@Url.Action("Edit", new { id = "<%= data.WorkItemID %>" })" class="btn btn-sm btn-warning">Chỉnh sửa</a>
+                </text>);
+        })
+    )
 </div>

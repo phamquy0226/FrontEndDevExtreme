@@ -27,7 +27,6 @@ namespace FrontEndDevExtreme.Controllers
             var assigned = await _userApiService.GetAllAsync();
             var assigner = await _userApiService.GetAllAsync();
             var departments = await _departmentApiService.GetAllAsync(); 
-
             ViewBag.Assigned = assigned;
             ViewBag.Assigner = assigner;
             ViewBag.Departments = departments;
@@ -47,20 +46,33 @@ namespace FrontEndDevExtreme.Controllers
             return View();
         }
 
-        
+
         [HttpPost]
-        public async Task<IActionResult> Create(WorkItemCreateModel model)
+        public async Task<IActionResult> Create([FromForm] WorkItemCreateModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = ModelState.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    )
+                });
+            }
 
-            var result = await _workItemApiService.CreateAsync(model);
+            var result = await _workItemApiService.CreateAsync(model); // result là bool
             if (result)
-                return RedirectToAction("Index");
+            {
+                return Json(new { success = true, redirectUrl = Url.Action("Index") });
+            }
 
-            ModelState.AddModelError("", "Không thể tạo công việc mới.");
-            return View(model);
+            return Json(new { success = false, message = "Tạo công việc thất bại. Vui lòng thử lại." });
         }
+
+
+
 
 
         public async Task<IActionResult> Detail(int id)
@@ -71,7 +83,48 @@ namespace FrontEndDevExtreme.Controllers
             workItem.Notes = await _noteApiService.GetNotesByWorkItemIdAsync(id);
             return View(workItem);
         }
-       
+
+        [HttpPost]
+        public async Task<IActionResult> AddNote(int workItemId, string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return Json(new { success = false, message = "Nội dung ghi chú không thể để trống." });
+            }
+
+            var result = await _noteApiService.AddNoteAsync(workItemId, content);
+
+            if (result)
+            {
+                // Lấy thông tin chi tiết của note vừa thêm để trả về
+                var newNote = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId); // Giả sử hàm này trả về List<NoteModel>
+                var lastNote = newNote.LastOrDefault();
+                return Json(new { success = true, data = lastNote }); // Trả về thông tin note mới
+            }
+            else
+            {
+                return Json(new { success = false, message = "Có lỗi khi thêm ghi chú." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteNote(int noteId, int workitemid) // Chỉ cần noteId để xóa
+        {
+            var result = await _noteApiService.DeleteNoteAsync(noteId, workitemid); // Thay đổi tham số
+
+            if (result)
+            {
+                return Json(new { success = true });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Có lỗi khi xóa note" });
+            }
+
+
+        }
+
+
         public async Task<IActionResult> Edit(int id)
         {
             var workItemDetail = await _workItemApiService.GetWorkItemDetailAsync(id);
@@ -108,13 +161,13 @@ namespace FrontEndDevExtreme.Controllers
             return View(model);
         }
 
-       
+
         [HttpPost]
         public async Task<IActionResult> Edit(WorkItemEditModel model)
         {
             if (!ModelState.IsValid)
             {
-                
+
                 ViewBag.Users = await _userApiService.GetAllAsync();
                 ViewBag.Departments = await _departmentApiService.GetAllAsync();
                 return View(model);
@@ -126,46 +179,11 @@ namespace FrontEndDevExtreme.Controllers
                 return RedirectToAction("Index");
             }
 
-            
+
             ViewBag.Users = await _userApiService.GetAllAsync();
             ViewBag.Departments = await _departmentApiService.GetAllAsync();
             ModelState.AddModelError(string.Empty, "Cập nhật thất bại");
             return View(model);
         }
-
-
-        [HttpPost]
-        public async Task<IActionResult> AddNote(int workItemId, string content)
-        {
-            if (string.IsNullOrEmpty(content))
-            {
-                ModelState.AddModelError("", "Nội dung ghi chú không thể để trống.");
-                return RedirectToAction("Details", new { id = workItemId });
-            }
-
-            
-            var result = await _noteApiService.AddNoteAsync(workItemId, content);
-
-            if (result)
-            {
-                return RedirectToAction("Detail", new { id = workItemId });
-            }
-            else
-            {
-                ModelState.AddModelError("", "Có lỗi khi thêm ghi chú.");
-                return RedirectToAction("Detail", new { id = workItemId });
-            }
-        }
-
-
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteNote(int workItemId, int noteId)
-        {
-           
-            await _noteApiService.DeleteNoteAsync(workItemId, noteId);
-            return RedirectToAction("Detail", new { id = workItemId });
-        }
-
     }
 }
