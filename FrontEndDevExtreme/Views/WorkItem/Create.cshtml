@@ -58,9 +58,9 @@
         @Html.Label("Độ ưu tiên")
         <br />
         @foreach (var item in new[] {
-    new { Text = "Thấp", Value = 0 },
-    new { Text = "Trung bình", Value = 1 },
-    new { Text = "Cao", Value = 2 }
+    new { Text = "Thấp", Value = 1 },
+    new { Text = "Trung bình", Value = 2 },
+    new { Text = "Cao", Value = 3 }
     })
         {
             <div class="form-check form-check-inline">
@@ -123,6 +123,7 @@
         <ul id="user-list" class="mt-2"></ul>
     </div>
 
+    <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary ml-2">Đóng</a>
     <button type="submit" class="btn btn-primary">Tạo mới</button>
 }
 
@@ -138,8 +139,7 @@
             if (selected && !selectedDepartments.includes(selected)) {
                 selectedDepartments.push(selected);
                 $("#department-list").append(
-                    `<li data-id="${selected}">
-                        ${text}
+                    `<li data-id="${selected}">${text}
                         <a href="#" onclick="removeDepartment('${selected}'); return false;">[x]</a>
                         <input type="hidden" name="DepartmentIDs" value="${selected}" />
                     </li>`);
@@ -157,8 +157,7 @@
             if (selected && !selectedUsers.includes(selected)) {
                 selectedUsers.push(selected);
                 $("#user-list").append(
-                    `<li data-id="${selected}">
-                        ${text}
+                    `<li data-id="${selected}">${text}
                         <a href="#" onclick="removeUser('${selected}'); return false;">[x]</a>
                         <input type="hidden" name="UserIDs" value="${selected}" />
                     </li>`);
@@ -169,5 +168,50 @@
             selectedUsers = selectedUsers.filter(x => x !== id);
             $(`#user-list li[data-id='${id}']`).remove();
         }
+
+        // Hàm cập nhật trạng thái theo tiến độ
+        function updateStatusByProgress() {
+            var progress = parseInt($("input[name='Progress']").val());
+
+            if (isNaN(progress) || progress <= 0) {
+                $("input[name='Status'][value='0']").prop("checked", true); // Chưa thực hiện
+            } else if (progress >= 100) {
+                $("input[name='Status'][value='2']").prop("checked", true); // Đã xong
+            } else {
+                $("input[name='Status'][value='1']").prop("checked", true); // Đang thực hiện
+            }
+        }
+
+        // Hàm cập nhật tiến độ theo trạng thái
+        function updateProgressByStatus() {
+            var status = $("input[name='Status']:checked").val();
+            var $progress = $("input[name='Progress']");
+
+            if (status === "0") { // Chưa thực hiện
+                $progress.val(0);
+                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Chưa thực hiện
+            } else if (status === "1") { // Đang thực hiện
+                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Đang thực hiện
+            } else if (status === "2") { // Đã xong
+                $progress.val(100);
+                $progress.prop("readonly", true); // Không cho phép chỉnh sửa tiến độ khi trạng thái là Đã xong
+            }
+        }
+
+        $(document).ready(function () {
+            // Gán sự kiện thay đổi khi thay đổi tiến độ
+            $("input[name='Progress']").on('input', function () {
+                updateStatusByProgress();
+            });
+
+            // Gán sự kiện khi chọn trạng thái
+            $("input[name='Status']").change(function () {
+                updateProgressByStatus();
+            });
+
+            // Khởi tạo trạng thái và tiến độ ban đầu
+            updateProgressByStatus();
+            updateStatusByProgress();
+        });
     </script>
 }

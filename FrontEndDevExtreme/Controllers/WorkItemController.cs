@@ -1,4 +1,5 @@
-﻿using FrontEndDevExtreme.Models;
+﻿using DevExpress.XtraEditors.Filtering;
+using FrontEndDevExtreme.Models;
 using FrontEndDevExtreme.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -30,6 +31,10 @@ namespace FrontEndDevExtreme.Controllers
             ViewBag.Assigned = assigned;
             ViewBag.Assigner = assigner;
             ViewBag.Departments = departments;
+            foreach (var workItem in workItems) {
+                workItem.Notes = await _noteApiService.GetNotesByWorkItemIdAsync(workItem.WorkItemID);
+                workItem.NoteCount = workItem.Notes.Count();
+            }
             return View(workItems);
         }
 
@@ -42,7 +47,6 @@ namespace FrontEndDevExtreme.Controllers
 
             ViewBag.Users = users;
             ViewBag.Departments = departments;
-
             return View();
         }
 
@@ -107,11 +111,18 @@ namespace FrontEndDevExtreme.Controllers
             }
         }
 
+        public async Task<IActionResult> GetNote(int id)
+        {
+            var Notes = await _noteApiService.GetNotesByWorkItemIdAsync(id);
+            return View(Notes);
+        }
+
+
 
         [HttpPost]
-        public async Task<IActionResult> DeleteNote(int noteId, int workitemid) // Chỉ cần noteId để xóa
+        public async Task<IActionResult> DeleteNote(int noteId, int workItemId) // Chỉ cần noteId để xóa
         {
-            var result = await _noteApiService.DeleteNoteAsync(noteId, workitemid); // Thay đổi tham số
+            var result = await _noteApiService.DeleteNoteAsync(noteId, workItemId); // Thay đổi tham số
 
             if (result)
             {
@@ -119,11 +130,10 @@ namespace FrontEndDevExtreme.Controllers
             }
             else
             {
-                return Json(new { success = false, message = "Có lỗi khi xóa note" });
+                return Json(new { success = false, message = "Có lỗi khi xóa ghi chú." });
             }
-
-
         }
+
 
 
         public async Task<IActionResult> Edit(int id)
@@ -186,5 +196,61 @@ namespace FrontEndDevExtreme.Controllers
             ModelState.AddModelError(string.Empty, "Cập nhật thất bại");
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var success = await _workItemApiService.DeleteAsync(id);
+            if (success)
+            {
+                TempData["Success"] = "Xóa thành công";
+                return RedirectToAction("Index");
+            }
+
+            TempData["Error"] = "Xóa thất bại";
+            return RedirectToAction("Edit", new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsCompleted(int id)
+        {
+            var workItem = await _workItemApiService.GetWorkItemDetailAsync(id);
+            if (workItem == null)
+                return Json(new { success = false, message = "Không tìm thấy công việc." });
+
+            var users = await _userApiService.GetAllAsync();
+            var departments = await _departmentApiService.GetAllAsync();
+
+            var model = new WorkItemEditModel
+            {
+                WorkItemID = workItem.WorkItemID,
+                TaskName = workItem.TaskName,
+                Status = 2,
+                Progress = 100,
+                TaskType = workItem.TaskType,
+                IsPinned = workItem.IsPinned,
+                StartDate = workItem.StartDate,
+                EndDate = workItem.EndDate,
+                AssignerID = workItem.AssignerID,
+                Priority = workItem.Priority,
+                DepartmentIDs = workItem.DepartmentList?
+                    .Split(',', StringSplitOptions.TrimEntries)
+                    .Select(name => departments.FirstOrDefault(d => d.DepartmentName == name)?.DepartmentID ?? 0)
+                    .Where(d => d != 0).ToList() ?? new List<int>(),
+                UserIDs = workItem.UserList?
+                    .Split(',', StringSplitOptions.TrimEntries)
+                    .Select(name => users.FirstOrDefault(u => u.UserName == name)?.UserID ?? 0)
+                    .Where(u => u != 0).ToList() ?? new List<int>()
+            };
+
+            var result = await _workItemApiService.UpdateAsync(id, model);
+            if (result)
+            {
+                return RedirectToAction("Index");
+            }
+
+            return Json(new { success = false, message = "Cập nhật thất bại." });
+        }
+
     }
 }

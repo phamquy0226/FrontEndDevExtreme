@@ -7,6 +7,7 @@
         public int Progress { get; set; }
         public string TaskType { get; set; }
         public bool IsPinned { get; set; }
+        public DateTime? DateCreate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 

@@ -9,6 +9,7 @@ namespace FrontEndDevExtreme.Repository
         Task<WorkItemDetailModel> GetWorkItemDetailAsync(int id);
         Task<List<WorkItemViewModel>> GetFilteredAsync(WorkItemFilterModel filter);
         Task<bool> UpdateAsync(int id, WorkItemEditModel model);
+        Task<bool> DeleteAsync(int id);
     }
 
 }
