@@ -4,161 +4,157 @@
     ViewData["Title"] = "Cập nhật công việc";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="bg-light p-4 rounded shadow-sm">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
 
-@using (Html.BeginForm("Edit", "WorkItem", FormMethod.Post, new { id = "EditWorkItemForm" }))
-{
-    @Html.HiddenFor(m => m.WorkItemID)
+    @using (Html.BeginForm("Edit", "WorkItem", FormMethod.Post, new { id = "EditWorkItemForm" }))
+    {
+        @Html.HiddenFor(m => m.WorkItemID)
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(m => m.TaskName)
-                @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(m => m.Progress)
-                @Html.TextBoxFor(m => m.Progress, new { @class = "form-control", type = "number", min = "0", max = "100" })
-                @Html.ValidationMessageFor(m => m.Progress, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(m => m.StartDate)
-                @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(m => m.AssignerID, "Người giao việc")
-                @Html.DropDownListFor(m => m.AssignerID, new SelectList(ViewBag.Users, "UserID", "UserName", Model.AssignerID), "Chọn người giao việc", new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.AssignerID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.Label("Trạng thái")
-                <div>
-                    @foreach (var item in new[] {
-                new { Text = "Chưa thực hiện", Value = 0 },
-                new { Text = "Đang thực hiện", Value = 1 },
-                new { Text = "Đã xong", Value = 2 }
-                })
-                    {
-                        <div class="form-check form-check-inline">
-                            @Html.RadioButtonFor(m => m.Status, item.Value, new { @class = "form-check-input", id = $"Status-{item.Value}" })
-                            <label class="form-check-label" for="Status-@item.Value">@item.Text</label>
-                        </div>
-                    }
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.TaskName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
                 </div>
-                @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
-            </div>
 
-            <div class="form-group">
-                @Html.Label("Loại công việc")
-                <div>
-                    @foreach (var type in new[] { "Tìm hiều", "Triển khai", "Báo cáo" })
-                    {
-                        <div class="form-check form-check-inline">
-                            @Html.RadioButtonFor(m => m.TaskType, type, new { @class = "form-check-input", id = $"TaskType-{type}" })
-                            <label class="form-check-label" for="TaskType-@type">@type</label>
-                        </div>
-                    }
-                    <div class="form-check form-check-inline ml-4">
-                        @Html.CheckBoxFor(m => m.IsPinned, new { @class = "form-check-input", id = "IsPinned" })
-                        @Html.LabelFor(m => m.IsPinned, new { @class = "form-check-label" })
-                    </div>
-                </div>
-                @Html.ValidationMessageFor(m => m.TaskType, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.Label("Độ ưu tiên")
-                <div>
-                    @foreach (var item in new[] {
-                new { Text = "Thấp", Value = 1 },
-                new { Text = "Trung bình", Value = 2 },
-                new { Text = "Cao", Value = 3 }
-                })
-                    {
-                        <div class="form-check form-check-inline">
-                            @Html.RadioButtonFor(m => m.Priority, item.Value, new { @class = "form-check-input", id = $"Priority-{item.Value}" })
-                            <label class="form-check-label" for="Priority-@item.Value">@item.Text</label>
-                        </div>
-                    }
-                </div>
-                @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.LabelFor(m => m.EndDate)
-                @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header font-weight-bold">Phòng ban nhận</div>
-                <div class="card-body">
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Progress, new { @class = "form-label" })
                     <div class="input-group">
-                        <select id="SelectedDepartmentID" class="form-control">
-                            <option value="">Chọn phòng ban</option>
-                            @foreach (var dept in ViewBag.Departments)
-                            {
-                                <option value="@dept.DepartmentID">@dept.DepartmentName</option>
-                            }
-                        </select>
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-secondary" onclick="addDepartment()">Thêm</button>
+                        @Html.TextBoxFor(m => m.Progress, new { @class = "form-control", type = "number", min = "0", max = "100", aria_describedby = "progress-addon" })
+                        <span class="input-group-text" id="progress-addon">%</span>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Progress, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.StartDate, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.EndDate, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        @foreach (var item in new[] {
+                    new { Text = "Chưa thực hiện", Value = 0 },
+                    new { Text = "Đang thực hiện", Value = 1 },
+                    new { Text = "Đã xong", Value = 2 }
+                    })
+                        {
+                            <div class="form-check form-check-inline">
+                                @Html.RadioButtonFor(m => m.Status, item.Value, new { @class = "form-check-input", id = $"Status-{item.Value}" })
+                                <label class="form-check-label" for="Status-@item.Value">@item.Text</label>
+                            </div>
+                        }
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Loại công việc</label>
+                    <div>
+                        @foreach (var type in new[] { "Tìm hiều", "Triển khai", "Báo cáo" })
+                        {
+                            <div class="form-check form-check-inline">
+                                @Html.RadioButtonFor(m => m.TaskType, type, new { @class = "form-check-input", id = $"TaskType-{type}" })
+                                <label class="form-check-label" for="TaskType-@type">@type</label>
+                            </div>
+                        }
+                        <div class="form-check form-check-inline ms-4">
+                            @Html.CheckBoxFor(m => m.IsPinned, new { @class = "form-check-input", id = "IsPinned" })
+                            @Html.LabelFor(m => m.IsPinned, new { @class = "form-check-label" })
                         </div>
                     </div>
-                    <ul id="department-list" class="mt-2 mb-0"></ul>
+                    @Html.ValidationMessageFor(m => m.TaskType, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Độ ưu tiên</label>
+                    <div>
+                        @foreach (var item in new[] {
+                    new { Text = "Thấp", Value = 1 },
+                    new { Text = "Trung bình", Value = 2 },
+                    new { Text = "Cao", Value = 3 }
+                    })
+                        {
+                            <div class="form-check form-check-inline">
+                                @Html.RadioButtonFor(m => m.Priority, item.Value, new { @class = "form-check-input", id = $"Priority-{item.Value}" })
+                                <label class="form-check-label" for="Priority-@item.Value">@item.Text</label>
+                            </div>
+                        }
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.AssignerID, "Người giao việc", new { @class = "form-label" })
+                    @Html.DropDownListFor(m => m.AssignerID, new SelectList(ViewBag.Users, "UserID", "UserName", Model.AssignerID), "Chọn người giao việc", new { @class = "form-select" })
+                    @Html.ValidationMessageFor(m => m.AssignerID, "", new { @class = "text-danger" })
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 mt-md-0 mt-3">
-            <div class="card">
-                <div class="card-header font-weight-bold">Người nhận công việc</div>
-                <div class="card-body">
-                    <div class="input-group">
-                        <select id="SelectedUserID" class="form-control">
-                            <option value="">Chọn người</option>
-                            @foreach (var user in ViewBag.Users)
-                            {
-                                <option value="@user.UserID">@user.UserName</option>
-                            }
-                        </select>
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-secondary" onclick="addUser()">Thêm</button>
+        <div class="row mt-4 g-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header fw-bold">Phòng ban nhận</div>
+                    <div class="card-body">
+                        <div class="input-group mb-2">
+                            <select id="SelectedDepartmentID" class="form-select">
+                                <option value="">Chọn phòng ban</option>
+                                @foreach (var dept in ViewBag.Departments)
+                                {
+                                    <option value="@dept.DepartmentID">@dept.DepartmentName</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-outline-primary" onclick="addDepartment()">Thêm</button>
                         </div>
+                        <ul id="department-list" class="list-unstyled mt-2 mb-0"></ul>
                     </div>
-                    <ul id="user-list" class="mt-2 mb-0"></ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header fw-bold">Người nhận công việc</div>
+                    <div class="card-body">
+                        <div class="input-group mb-2">
+                            <select id="SelectedUserID" class="form-select">
+                                <option value="">Chọn người</option>
+                                @foreach (var user in ViewBag.Users)
+                                {
+                                    <option value="@user.UserID">@user.UserName</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-outline-primary" onclick="addUser()">Thêm</button>
+                        </div>
+                        <ul id="user-list" class="list-unstyled mt-2 mb-0"></ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="form-group mt-4 d-flex justify-content-between">
-        <div>
-            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary">Đóng</a>
-        </div>
-        <div>
+        <div class="mt-4 d-flex justify-content-end gap-2">
             <button type="submit" class="btn btn-primary">Cập nhật</button>
+            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary">Đóng</a>
+            @using (Html.BeginForm("Delete", "WorkItem", FormMethod.Post, new { onsubmit = "return confirm('Bạn có chắc chắn muốn xóa công việc này?');", @class = "d-inline-block" }))
+            {
+                @Html.Hidden("id", Model.WorkItemID)
+                <button type="submit" class="btn btn-danger">Xóa</button>
+            }
         </div>
-    </div>
-}
-
-@using (Html.BeginForm("Delete", "WorkItem", FormMethod.Post, new { onsubmit = "return confirm('Bạn có chắc chắn muốn xóa công việc này?');" }))
-{
-    @Html.Hidden("id", Model.WorkItemID)
-    <button type="submit" class="btn btn-danger">Xóa công việc</button>
-}
+    }
+</div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -172,9 +168,10 @@
             if (selected && !selectedDepartments.includes(selected)) {
                 selectedDepartments.push(selected);
                 $("#department-list").append(
-                    `<li data-id="${selected}">${text} <a href="#" onclick="removeDepartment('${selected}'); return false;">[x]</a><input type="hidden" name="DepartmentIDs" value="${selected}" /></li>`
+                    `<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${selected}">${text} <button type="button" class="btn-close btn-sm" aria-label="Xóa" onclick="removeDepartment('${selected}');"></button><input type="hidden" name="DepartmentIDs" value="${selected}" /></li>`
                 );
             }
+            $("#SelectedDepartmentID").val(""); // Clear the dropdown after adding
         }
 
         function removeDepartment(id) {
@@ -188,9 +185,10 @@
             if (selected && !selectedUsers.includes(selected)) {
                 selectedUsers.push(selected);
                 $("#user-list").append(
-                    `<li data-id="${selected}">${text} <a href="#" onclick="removeUser('${selected}'); return false;">[x]</a><input type="hidden" name="UserIDs" value="${selected}" /></li>`
+                    `<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${selected}">${text} <button type="button" class="btn-close btn-sm" aria-label="Xóa" onclick="removeUser('${selected}');"></button><input type="hidden" name="UserIDs" value="${selected}" /></li>`
                 );
             }
+            $("#SelectedUserID").val(""); // Clear the dropdown after adding
         }
 
         function removeUser(id) {
@@ -198,63 +196,63 @@
             $(`#user-list li[data-id='${id}']`).remove();
         }
 
-        // Load lại danh sách đã chọn khi vào trang Edit
+
         $(document).ready(function () {
             selectedDepartments.forEach(function (id) {
                 var text = $(`#SelectedDepartmentID option[value='${id}']`).text();
                 $("#department-list").append(
-                    `<li data-id="${id}">${text} <a href="#" onclick="removeDepartment('${id}'); return false;">[x]</a><input type="hidden" name="DepartmentIDs" value="${id}" /></li>`
+                    `<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${id}">${text} <button type="button" class="btn-close btn-sm" aria-label="Xóa" onclick="removeDepartment('${id}');"></button><input type="hidden" name="DepartmentIDs" value="${id}" /></li>`
                 );
             });
 
             selectedUsers.forEach(function (id) {
                 var text = $(`#SelectedUserID option[value='${id}']`).text();
                 $("#user-list").append(
-                    `<li data-id="${id}">${text} <a href="#" onclick="removeUser('${id}'); return false;">[x]</a><input type="hidden" name="UserIDs" value="${id}" /></li>`
+                    `<li class="list-group-item d-flex justify-content-between align-items-center" data-id="${id}">${text} <button type="button" class="btn-close btn-sm" aria-label="Xóa" onclick="removeUser('${id}');"></button><input type="hidden" name="UserIDs" value="${id}" /></li>`
                 );
             });
 
-            // Khởi tạo trạng thái và tiến độ ban đầu
+
             updateProgressByStatus();
             updateStatusByProgress();
         });
 
-        // Hàm cập nhật trạng thái theo tiến độ
+
         function updateStatusByProgress() {
             var progress = parseInt($("input[name='Progress']").val());
 
             if (isNaN(progress) || progress <= 0) {
-                $("input[name='Status'][value='0']").prop("checked", true); // Chưa thực hiện
+                $("input[name='Status'][value='0']").prop("checked", true);
             } else if (progress >= 100) {
-                $("input[name='Status'][value='2']").prop("checked", true); // Đã xong
+                $("input[name='Status'][value='2']").prop("checked", true);
             } else {
-                $("input[name='Status'][value='1']").prop("checked", true); // Đang thực hiện
+                $("input[name='Status'][value='1']").prop("checked", true);
             }
         }
 
-        // Hàm cập nhật tiến độ theo trạng thái
+
         function updateProgressByStatus() {
             var status = $("input[name='Status']:checked").val();
             var $progress = $("input[name='Progress']");
 
-            if (status === "0") { // Chưa thực hiện
+            if (status === "0") {
                 $progress.val(0);
-                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Chưa thực hiện
-            } else if (status === "1") { // Đang thực hiện
-                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Đang thực hiện
-            } else if (status === "2") { // Đã xong
+                $progress.prop("readonly", false);
+            } else if (status === "1") {
+                $progress.prop("readonly", false);
+            } else if (status === "2") {
                 $progress.val(100);
-                $progress.prop("readonly", true); // Không cho phép chỉnh sửa tiến độ khi trạng thái là Đã xong
+                $progress.prop("readonly", true);
             }
         }
 
         $(document).ready(function () {
-            // Gán sự kiện thay đổi khi thay đổi tiến độ
+
             $("input[name='Progress']").on('input', function () {
                 updateStatusByProgress();
             });
 
-            // Gán sự kiện khi chọn trạng thái
+
             $("input[name='Status']").change(function () {
                 updateProgressByStatus();
             });

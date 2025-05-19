@@ -3,7 +3,7 @@
 <form id="formCreateWorkItemPop" method="post" action="@Url.Action("Create", "WorkItem")">
     <div id="workItemCreatePartial">
         <div class="row">
-            <!-- Cột trái -->
+        
             <div class="col-md-6 mb-3">
                 <div class="mb-3">
                     @Html.LabelFor(m => m.TaskName)
@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <!-- Cột phải -->
+           
             <div class="col-md-6 mb-3">
                 <div class="mb-3">
                     <label class="form-label">Trạng thái</label><br />
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <!-- Nút -->
+        
         <div class="d-flex justify-content-end mt-4">
             <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary me-2">Đóng</a>
             <button type="submit" class="btn btn-primary">Tạo mới</button>
