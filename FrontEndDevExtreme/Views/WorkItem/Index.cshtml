@@ -1,308 +1,431 @@
-﻿@model List<FrontEndDevExtreme.Models.WorkItemViewModel>
+﻿
+@model List<FrontEndDevExtreme.Models.WorkItemViewModel>
 @{
     ViewData["Title"] = "Danh sách công việc";
     var currentQuery = Context.Request.Query;
 }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 
-<h2 class="mb-3">@ViewData["Title"]</h2>
+<h2 class="mb-4">@ViewData["Title"]</h2>
 
-
-<div class="d-flex justify-content-end mb-3">
-    <a asp-action="Create" class="btn btn-success">+ Tạo công việc</a>
-</div>
-
-
-<form method="get" class="mb-4">
-    <div class="row g-2">
-        <!-- TextBox Tìm kiếm tên công việc -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().TextBox()
-                .Name("SearchTaskName")
-                .Placeholder("Tên công việc")
-                .Value(Context.Request.Query["SearchTaskName"].ToString())
-                .ShowClearButton(true)
-                .OnValueChanged("onSearchTaskNameChange"))  <!-- Thêm sự kiện cho TextBox -->
-        </div>
-
-        <!-- SelectBox Người thực hiện -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("UserName")
-                .DataSource(ViewBag.Assigned)
-                .ValueExpr("UserName")
-                .DisplayExpr("UserName")
-                .ShowClearButton(true)
-                .Placeholder("Người thực hiện")
-                .Value(Context.Request.Query["UserName"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- SelectBox Người giao -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("AssignerName")
-                .DataSource(ViewBag.Assigner)
-                .ValueExpr("UserName")
-                .DisplayExpr("UserName")
-                .ShowClearButton(true)
-                .Placeholder("Người giao")
-                .Value(Context.Request.Query["AssignerName"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- SelectBox Trạng thái -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("Status")
-                .DataSource(new[] {
-            new { ID = "0", Name = "Chưa thực hiện" },
-            new { ID = "1", Name = "Đang thực hiện" },
-            new { ID = "2", Name = "Đã xong" }
-            })
-                .ValueExpr("ID")
-                .DisplayExpr("Name")
-                .ShowClearButton(true)
-                .Placeholder("Trạng thái")
-                .Value(Context.Request.Query["Status"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- SelectBox Độ ưu tiên -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("Priority")
-                .DataSource(new[] {
-            new { ID = "1", Name = "Thấp" },
-            new { ID = "2", Name = "Trung bình" },
-            new { ID = "3", Name = "Cao" }
-            })
-                .ValueExpr("ID")
-                .DisplayExpr("Name")
-                .ShowClearButton(true)
-                .Placeholder("Độ ưu tiên")
-                .Value(Context.Request.Query["Priority"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- SelectBox Ghim? -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("IsPinned")
-                .DataSource(new[] {
-            new { ID = "true", Name = "Có" },
-            new { ID = "false", Name = "Không" }
-            })
-                .ValueExpr("ID")
-                .DisplayExpr("Name")
-                .Placeholder("Ghim?")
-                .ShowClearButton(true)
-                .Value(Context.Request.Query["IsPinned"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- DateBox Từ ngày -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().DateBox()
-                .Name("StartDateFrom")
-                .Placeholder("Từ ngày")
-                .ShowClearButton(true)
-                .Value(Context.Request.Query["StartDateFrom"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- DateBox Đến ngày -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().DateBox()
-                .Name("EndDateTo")
-                .Placeholder("Đến ngày")
-                .ShowClearButton(true)
-                .Value(Context.Request.Query["EndDateTo"].ToString())
-                .OnValueChanged("onSearchTaskNameChange"))
-        </div>
-
-        <!-- SelectBox Phòng ban -->
-        <div class="col-md-2">
-            @(Html.DevExtreme().SelectBox()
-                .Name("DepartmentID")
-                .DataSource(ViewBag.Departments)
-                .ValueExpr("DepartmentID")
-                .DisplayExpr("DepartmentName")
-                .ShowClearButton(true)
-                .Placeholder("Phòng ban")
-                .Value(currentQuery.ContainsKey("DepartmentID") ? currentQuery["DepartmentID"].ToString() : null)
-                .OnValueChanged("onSearchTaskNameChange"))
+<!-- Nút hành động -->
+<div class="card mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div></div>
+        <div class="d-flex gap-2">
+            @* <a asp-action="Create" class="btn btn-outline-primary">Trang tạo đầy đủ</a> *@
+            <button type="button" id="btnOpenCreatePopup" class="btn btn-success">+ Tạo công việc </button>
         </div>
     </div>
-</form>
+</div>
 
+<!-- Popup -->
+<div id="popupCreateWorkItem"></div>
+<div id="popupNote"></div>
+<!-- Bộ lọc -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="Filter" method="get">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                <div class="col">
+                    @(Html.DevExtreme().TextBox()
+                            .Name("SearchTaskName")
+                            .Placeholder("Tên công việc")
+                            .Value(currentQuery["SearchTaskName"].ToString())
+                            .ShowClearButton(true))
 
-<div id="gridContainer">
-    @(Html.DevExtreme().DataGrid<FrontEndDevExtreme.Models.WorkItemViewModel>()
-            .ID("workItemGrid")
-            .DataSource(Model)
-            .ShowBorders(true)
-            .Paging(p => p.PageSize(5))
-            .ColumnAutoWidth(true)
-            .Pager(pager =>
-            {
-                pager.ShowPageSizeSelector(true);
-                pager.AllowedPageSizes(new[] { 5, 10, 20 });
-                pager.ShowInfo(true);
-                pager.ShowNavigationButtons(true);
-            })
-            .Columns(
-                
-            columns =>
-            {
-                columns.Add()
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("UserName")
+                            .DataSource(ViewBag.Assigned)
+                            .ValueExpr("UserName")
+                            .DisplayExpr("UserName")
+                            .Placeholder("Người thực hiện")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["UserName"].ToString()))
+
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("AssignerName")
+                            .DataSource(ViewBag.Assigner)
+                            .ValueExpr("UserName")
+                            .DisplayExpr("UserName")
+                            .Placeholder("Người giao")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["AssignerName"].ToString()))
+                </div>
+
+                <div class="col">
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("Status")
+                            .DataSource(new[] {
+                            new { ID = "0", Name = "Chưa thực hiện" },
+                            new { ID = "1", Name = "Đang thực hiện" },
+                            new { ID = "2", Name = "Đã xong" }
+                        })
+                            .ValueExpr("ID")
+                            .DisplayExpr("Name")
+                            .Placeholder("Trạng thái")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["Status"].ToString()))
+
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("Priority")
+                            .DataSource(new[] {
+                            new { ID = "1", Name = "Thấp" },
+                            new { ID = "2", Name = "Trung bình" },
+                            new { ID = "3", Name = "Cao" }
+                        })
+                            .ValueExpr("ID")
+                            .DisplayExpr("Name")
+                            .Placeholder("Độ ưu tiên")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["Priority"].ToString()))
+
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("IsPinned")
+                            .DataSource(new[] {
+                            new { ID = "true", Name = "Có" },
+                            new { ID = "false", Name = "Không" }
+                        })
+                            .ValueExpr("ID")
+                            .DisplayExpr("Name")
+                            .Placeholder("Ghim?")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["IsPinned"].ToString()))
+                </div>
+
+                <div class="col">
+                    @(Html.DevExtreme().DateBox()
+                            .Name("StartDateFrom")
+                            .Placeholder("Từ ngày")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["StartDateFrom"].ToString()))
+
+                    @(Html.DevExtreme().DateBox()
+                            .Name("EndDateTo")
+                            .Placeholder("Đến ngày")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["EndDateTo"].ToString()))
+
+                    @(Html.DevExtreme().SelectBox()
+                            .Name("DepartmentID")
+                            .DataSource(ViewBag.Departments)
+                            .ValueExpr("DepartmentID")
+                            .DisplayExpr("DepartmentName")
+                            .Placeholder("Phòng ban")
+                            .ShowClearButton(true)
+                            .Value(currentQuery["DepartmentID"].ToString()))
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Tìm kiếm
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grid -->
+<div class="card">
+    <div class="card-body">
+        <div id="gridContainer">
+            @(Html.DevExtreme().DataGrid<FrontEndDevExtreme.Models.WorkItemViewModel>()
+                    .ID("workItemGrid")
+                    .DataSource(Model)
+                    .ShowBorders(true)
+                    .RowAlternationEnabled(true)
+                    .WordWrapEnabled(true)
+                    .ColumnAutoWidth(true)
+                    .ColumnMinWidth(100)
+                    .Paging(p => p.PageSize(5))
+                    .Pager(p => {
+                        p.ShowPageSizeSelector(true)
+                        .AllowedPageSizes(new[] { 5, 10, 20 })
+                        .ShowInfo(true)
+                        .ShowNavigationButtons(true);
+                    })
+                    .Columns(columns => {
+                        columns.Add()
                 .Caption("Thao tác")
                 .AllowFiltering(false)
                 .AllowSorting(false)
                 .CellTemplate(@<text>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-warning"
-                                onclick="location.href='@Url.Action("Edit", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
-                            Chỉnh sửa
+                <div class="btn-group" role="group" aria-label="Actions">
+                    <!-- Edit button -->
+                    <button type="button"
+                            class="btn btn-sm btn-warning"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Chỉnh sửa"
+                            onclick="location.href='@Url.Action("Edit", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
+                        <i class="bi bi-pencil-square"></i>  <!-- Bootstrap Icons edit -->
+                    </button>
+
+                    <!-- Delete button -->
+                    <form action="@Url.Action("Delete", "WorkItem")" method="post"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');" style="display:inline;">
+                        <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
+                        <button type="submit"
+                                class="btn btn-sm btn-danger"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Xóa">
+                            <i class="bi bi-trash"></i> <!-- Bootstrap Icons trash -->
                         </button>
-                        <form action="@Url.Action("Delete", "WorkItem")" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');" style="display:inline;">
-                            <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                        </form>
-                        <% if (data.Status !== 2) { %>
-                        <form action="@Url.Action("MarkAsCompleted", "WorkItem")" method="post" style="display:inline;" onsubmit="return confirm('Xác nhận đánh dấu hoàn tất?');">
-                            <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                            <button type="submit" class="btn btn-sm btn-success">Hoàn tất</button>
-                        </form>
-                        <% } %>
-                    </div>
-                </text>);
-                columns.Add()
+                    </form>
+
+                    <!-- Mark as Completed button -->
+                    <% if (data.Status !== 2) { %>
+                    <form action="@Url.Action("MarkAsCompleted", "WorkItem")" method="post"
+                          style="display:inline;" onsubmit="return confirm('Xác nhận đánh dấu hoàn tất?');">
+                        <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
+                        <button type="submit"
+                                class="btn btn-sm btn-success"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Hoàn tất">
+                            <i class="bi bi-check-circle"></i> <!-- Bootstrap Icons check-circle -->
+                        </button>
+                    </form>
+                    <% } %>
+                </div>
+            </text>);
+
+                        columns.Add()
                 .Caption("Thông tin")
                 .CellTemplate(@<text>
-                    <div>
-                        <div style="color: blue; cursor: pointer; <% if (data.Status === 2) { %> text-decoration: line-through; <% } %>"
-                             onclick="location.href='@Url.Action("Detail", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
-                            <strong><%= data.TaskName %></strong>
-                        </div>
-
-                        <div>
-                            <% if (data.EndDate) {
-                            var end = new Date(data.EndDate);
-                            var now = new Date();
-                            var diffMs = end - now;
-                            var absMs = Math.abs(diffMs);
-
-                            var days = Math.floor(absMs / (1000 * 60 * 60 * 24));
-                            var hours = Math.floor((absMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                            var minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                            if (diffMs >= 0) { %>
-                            <div class="mt-1 text-primary">
-                                 <strong>Còn lại: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong>
-                            </div>
-                            <% } else { %>
-                            <div class="mt-1 text-danger">
-                                 <strong>Đã trễ: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong>
-                            </div>
-                            <% }
-                            } %>
-
-                        </div>
-
-                        <div class="mt-1">
-                            <% if (data.Priority === 1) { %>
-                            <span class='badge bg-success text-white me-1'>Thấp</span>
-                            <% } else if (data.Priority === 2) { %>
-                            <span class='badge bg-warning text-dark me-1'>Trung bình</span>
-                            <% } else if (data.Priority === 3) { %>
-                            <span class='badge bg-danger text-white me-1'>Cao</span>
-                            <% } %>
-
-                            <% if (data.Status === 0) { %>
-                            <span class='badge bg-secondary'>Chưa thực hiện</span>
-                            <% } else if (data.Status === 1) { %>
-                            <span class='badge bg-warning text-dark'>Đang thực hiện</span>
-                            <% } else if (data.Status === 2) { %>
-                            <span class='badge bg-success'>Đã xong</span>
-                            <% } %>
-                            <% if (data.TaskType) { %>
-                            <%= data.TaskType %>               
-                            <% } %>
-                            <% if (data.IsPinned === true) { %> <span title="Ghim">📌</span> <% } %>
-                        </div>
+                <div>
+                    <div style="color: blue; cursor: pointer; <% if (data.Status === 2) { %> text-decoration: line-through; <% } %>"
+                         onclick="location.href='@Url.Action("Detail", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
+                        <strong><%= data.TaskName %></strong>
                     </div>
-                 </text>);
 
-                columns.Add()
+                    <div>
+                        <% if (data.EndDate) {
+                        var end = new Date(data.EndDate);
+                        var now = new Date();
+                        var diffMs = end - now;
+                        var absMs = Math.abs(diffMs);
+
+                        var days = Math.floor(absMs / (1000 * 60 * 60 * 24));
+                        var hours = Math.floor((absMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        var minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
+
+                        if (diffMs >= 0) { %>
+                        <div class="mt-1 text-primary">
+                            <strong>Còn lại: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong>
+                        </div>
+                        <% } else { %>
+                        <div class="mt-1 text-danger">
+                            <strong>Đã trễ: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong>
+                        </div>
+                        <% }
+                        } %>
+
+                    </div>
+
+                    <div class="mt-1">
+                        <% if (data.Priority === 1) { %>
+                        <span class='badge bg-success text-white me-1'>Thấp</span>
+                        <% } else if (data.Priority === 2) { %>
+                        <span class='badge bg-warning text-dark me-1'>Trung bình</span>
+                        <% } else if (data.Priority === 3) { %>
+                        <span class='badge bg-danger text-white me-1'>Cao</span>
+                        <% } %>
+
+                        <% if (data.Status === 0) { %>
+                        <span class='badge bg-secondary'>Chưa thực hiện</span>
+                        <% } else if (data.Status === 1) { %>
+                        <span class='badge bg-warning text-dark'>Đang thực hiện</span>
+                        <% } else if (data.Status === 2) { %>
+                        <span class='badge bg-success'>Đã xong</span>
+                        <% } %>
+                        <% if (data.TaskType) { %>
+                        <span class="badge bg-dark-subtle"><%= data.TaskType %></span>
+                        <% } %>
+                        <% if (data.IsPinned === true) { %> <span title="Ghim">📌</span> <% } %>
+                    </div>
+                </div>
+            </text>);
+
+                        columns.Add()
                 .Caption("Thời gian & Tiến độ")
                 .CellTemplate(@<text>
+                <div>
+                    <% if (data.StartDate || data.EndDate) { %>
                     <div>
-                        <% if (data.StartDate || data.EndDate) { %>
-                        <div>
-                            <strong><%= data.StartDate ? new Date(data.StartDate).toLocaleDateString('vi-VN') : '' %> -> <%= data.EndDate ? new Date(data.EndDate).toLocaleDateString('vi-VN') : '' %></strong>
-                        </div>
-                        <% } %>
-                        <div class='progress mt-1' style='height: 20px;'>
-                            <div class='progress-bar bg-info' role='progressbar'
-                                 style='width: <%= data.Progress %>%;'
-                                 aria-valuenow='<%= data.Progress %>' aria-valuemin='0' aria-valuemax='100'>
-                                <%= data.Progress %>%
-                            </div>
-                        </div>
-                        <% if (data.DateCreate) { %>
-                        <div class="mt-1 text-muted" style="font-size: 12px;">
-                            Tạo lúc: <%= new Date(data.DateCreate).toLocaleString('vi-VN') %>
-                        </div>
-                        <% } %>
+                        <strong><%= data.StartDate ? new Date(data.StartDate).toLocaleDateString('vi-VN') : '' %> -> <%= data.EndDate ? new Date(data.EndDate).toLocaleDateString('vi-VN') : '' %></strong>
                     </div>
-                </text>);
+                    <% } %>
+                    <div class='progress mt-1' style='height: 20px;'>
+                        <div class='progress-bar bg-info' role='progressbar'
+                             style='width: <%= data.Progress %>%;'
+                             aria-valuenow='<%= data.Progress %>' aria-valuemin='0' aria-valuemax='100'>
+                            <%= data.Progress %>%
+                        </div>
+                    </div>
+                    <% if (data.DateCreate) { %>
+                    <div class="mt-1 text-muted" style="font-size: 12px;">
+                        Tạo lúc: <%= new Date(data.DateCreate).toLocaleString('vi-VN') %>
+                    </div>
+                    <% } %>
+                </div>
+            </text>);
 
 
-                columns.AddFor(m => m.AssignerName)
+                        columns.AddFor(m => m.AssignerName)
                 .Caption("Người giao");
 
-                columns.AddFor(m => m.UserList)
+                        columns.AddFor(m => m.UserList)
                 .Caption("Người thực hiện")
                 .CellTemplate(@<text>
-                    <% if (data.UserList) { %>
-                    <% data.UserList.split(',').forEach(function(user) { %>
-                    <div><%= user.trim() %></div>
-                    <% }); %>
-                    <% } %>
-                </text>);
+                <% if (data.UserList) { %>
+                <% data.UserList.split(',').forEach(function(user) { %>
+                <div><%= user.trim() %></div>
+                <% }); %>
+                <% } %>
+            </text>);
 
-                columns.AddFor(m => m.DepartmentList)
+                        columns.AddFor(m => m.DepartmentList)
                 .Caption("Phòng ban nhận")
                 .CellTemplate(@<text>
-                    <% if (data.DepartmentList) { %>
-                    <% data.DepartmentList.split(',').forEach(function(dept) { %>
-                    <div><%= dept.trim() %></div>
-                    <% }); %>
-                    <% } %>
-                </text>);
+                <% if (data.DepartmentList) { %>
+                <% data.DepartmentList.split(',').forEach(function(dept) { %>
+                <div><%= dept.trim() %></div>
+                <% }); %>
+                <% } %>
+            </text>
+            );
 
-                columns.Add()
-                .Caption("Số ghi chú")
-                .DataField("NoteCount")
-                .CellTemplate(@<text>
-                    <div><%= data.NoteCount %> Ghi chú</div>
-                </text>);  
-            })
-        )
+                        columns.Add()
+                    .Caption("Ghi chú")
+                    .DataField("NoteCount")
+                    .CellTemplate(@<text>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-open-note" data-id="<%= data.WorkItemID %>">
+                        <%= data.NoteCount %> Ghi chú
+                    </button>
+                </div>
+            </text>);
+
+                }))
+        </div>
+    </div>
 </div>
 
-<script type="text/javascript">
-    function onSearchTaskNameChange(e) {
-        var form = document.querySelector('form');
-        form.submit();
-    }
-    $("select, input").on("change", function () {
-        var form = $("form");
-        form.submit();
-    }); 
-    $(".dx-clear-button").on("click", function() {
-        var form = $("form");
-        form.submit(); 
-    });
+<div class="footer-space mb-5"></div>
 
-</script>
+@section Scripts {
+    <script src="~/js/create-workitem.js"></script>
+    <script src="~/js/note.js"></script>
+    <script>
+        $(function () {
+            const popup = $("#popupCreateWorkItem").dxPopup({
+                title: "Tạo công việc mới",
+                width: "50%",
+                height: "100%",
+                visible: false,
+                showCloseButton: true,
+                showTitle: true,
+                dragEnabled: true,
+                hideOnOutsideClick: true,
+                position: {
+                    my: "top right",
+                    at: "top right",
+                    of: window,
+                    offset: "0 0"
+                },
+                animation: {
+                    show: {
+                        type: "slide",
+                        duration: 400,
+                        from: { left: $(window).width(), opacity: 0 },
+                        to: { left: $(window).width() / 2, opacity: 1 }
+                    },
+                    hide: {
+                        type: "fadeOut",
+                        duration: 300
+                    }
+                },
+                contentTemplate: function (contentElement) {
+                    contentElement.append("<div class='text-muted'>Đang tải...</div>");
+                    $.get('@Url.Action("CreatePopUp", "WorkItem")', function (html) {
+                        contentElement.html(html);
+
+                        // Đây là chỗ gọi initWorkItemCreate() cho popup
+                        initWorkItemCreate();
+                    });
+                }
+            }).dxPopup("instance");
+
+            $("#btnOpenCreatePopup").on("click", function (e) {
+                e.preventDefault();
+                popup.show();
+            });
+        });
+    </script>
+
+    <script>
+                              $(function () {
+            const popupNote = $("#popupNote").dxPopup({
+                title: "Ghi chú",
+                width: "50%",
+                height: "100%",
+                visible: false,
+                showCloseButton: true,
+                showTitle: true,
+                dragEnabled: true,
+                hideOnOutsideClick: true,
+                position: {
+                    my: "top right",
+                    at: "top right",
+                    of: window,
+                    offset: "0 0"
+                },
+                animation: {
+                    show: {
+                        type: "slide",
+                        duration: 400,
+                        from: { left: $(window).width(), opacity: 0 },
+                        to: { left: $(window).width() / 2, opacity: 1 }
+                    },
+                    hide: {
+                        type: "fadeOut",
+                        duration: 300
+                    }
+                },
+                contentTemplate: function (contentElement) {
+                    // Chỉ tạo 1 thẻ chứa nội dung
+                    contentElement.append('<div id="popupNoteContent"><div class="text-muted">Chưa có nội dung.</div></div>');
+                },
+                onShown: function () {
+                    const container = $("#popupNoteContent");
+                    container.html("<div class='text-muted'>Đang tải...</div>");
+
+                    if (popupNote._workItemId) {
+                        $.get('@Url.Action("NotePartial", "WorkItem")', { workItemId: popupNote._workItemId }, function (html) {
+                            container.html(html);
+                            initNotePopup(); // nếu có
+                        }).fail(function () {
+                            container.html("<div class='text-danger'>Không thể tải ghi chú.</div>");
+                        });
+                    } else {
+                        container.html("<div class='text-warning'>Không có công việc được chọn.</div>");
+                    }
+                },
+                onHidden: function () {
+                    // Xóa ID và nội dung
+                    popupNote._workItemId = undefined;
+                    $("#popupNoteContent").empty();
+                }
+            }).dxPopup("instance");
+
+            // Mở popup với ID mới
+            $(document).on("click", ".btn-open-note", function (e) {
+                e.preventDefault();
+                const workItemId = $(this).data("id");
+                popupNote._workItemId = workItemId;
+                popupNote.show();
+            });
+        });
+    </script>
+
+}
+

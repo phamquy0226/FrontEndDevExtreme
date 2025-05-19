@@ -33,7 +33,7 @@ public class NoteApiService : INoteApiService
 
         var noteData = new
         {
-            WorkItemID = workItemId, 
+            WorkItemID = workItemId,
             Content = content,        
             DateCreate = dateCreate   
         };

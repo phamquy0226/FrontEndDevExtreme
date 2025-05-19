@@ -39,7 +39,6 @@ namespace FrontEndDevExtreme.Controllers
         }
 
 
-
         public async Task<IActionResult> Create()
         {
             var users = await _userApiService.GetAllAsync();
@@ -76,6 +75,56 @@ namespace FrontEndDevExtreme.Controllers
         }
 
 
+        public async Task<IActionResult> CreatePopUp()
+        {
+            var users = await _userApiService.GetAllAsync();
+            var departments = await _departmentApiService.GetAllAsync();
+
+            ViewBag.Users = users;
+            ViewBag.Departments = departments;
+
+            // Trả về PartialView cho popup load
+            return PartialView("_CreateWorkItemPartial", new WorkItemCreateModel());
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePopUp([FromForm] WorkItemCreateModel model)
+        {
+            // Gộp dữ liệu từ các input hidden thành danh sách ID
+            var departmentIds = Request.Form["DepartmentIDs"].ToList();
+            var userIds = Request.Form["UserIDs"].ToList();
+
+            // Gán lại danh sách ID cho model
+            model.DepartmentIDs = departmentIds.Select(int.Parse).ToList();
+            model.UserIDs = userIds.Select(int.Parse).ToList();
+
+            // Kiểm tra hợp lệ model
+            if (!ModelState.IsValid)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = ModelState.ToDictionary(
+                        x => x.Key,
+                        x => x.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    )
+                });
+            }
+
+            // Gọi API tạo mới công việc
+            var result = await _workItemApiService.CreateAsync(model);
+            if (result)
+            {
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false, message = "Tạo công việc thất bại. Vui lòng thử lại." });
+        }
+
+
+
+
 
 
 
@@ -88,41 +137,81 @@ namespace FrontEndDevExtreme.Controllers
             return View(workItem);
         }
 
+        public async Task<IActionResult> NotePartial(int workItemId)
+        {
+            var noteModels = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId);
+
+            // Chuyển sang NoteViewModel
+            var noteViewModels = noteModels.Select(n => new NoteViewModel
+            {
+                NoteID = n.NoteID,
+                Content = n.Content,
+                CreatedDate = n.CreatedDate,
+                // các field khác nếu có
+            }).ToList();
+
+            return PartialView("_NotePartial", noteViewModels);
+        }
+
+
+
+
         [HttpPost]
         public async Task<IActionResult> AddNote(int workItemId, string content)
         {
+            // Kiểm tra nội dung ghi chú không trống
             if (string.IsNullOrEmpty(content))
             {
                 return Json(new { success = false, message = "Nội dung ghi chú không thể để trống." });
             }
 
-            var result = await _noteApiService.AddNoteAsync(workItemId, content);
-
-            if (result)
+            try
             {
-                // Lấy thông tin chi tiết của note vừa thêm để trả về
-                var newNote = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId); // Giả sử hàm này trả về List<NoteModel>
-                var lastNote = newNote.LastOrDefault();
-                return Json(new { success = true, data = lastNote }); // Trả về thông tin note mới
-            }
-            else
-            {
-                return Json(new { success = false, message = "Có lỗi khi thêm ghi chú." });
-            }
-        }
+                // Thêm ghi chú vào cơ sở dữ liệu
+                var result = await _noteApiService.AddNoteAsync(workItemId, content);
 
-        public async Task<IActionResult> GetNote(int id)
-        {
-            var Notes = await _noteApiService.GetNotesByWorkItemIdAsync(id);
-            return View(Notes);
+                if (result)
+                {
+                    // Lấy danh sách ghi chú mới nhất sau khi thêm
+                    var newNote = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId);
+                    var lastNote = newNote.LastOrDefault();
+
+                    if (lastNote != null)
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            data = new
+                            {
+                                lastNote.NoteID,
+                                lastNote.Content,
+                                CreatedDate = lastNote.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Không thể lấy ghi chú vừa thêm." });
+                    }
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Có lỗi khi thêm ghi chú." });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log exception (nếu cần thiết)
+                return Json(new { success = false, message = "Đã có lỗi xảy ra, vui lòng thử lại sau." });
+            }
         }
 
 
 
         [HttpPost]
-        public async Task<IActionResult> DeleteNote(int noteId, int workItemId) // Chỉ cần noteId để xóa
+        public async Task<IActionResult> DeleteNote(int noteId, int workItemId)
         {
-            var result = await _noteApiService.DeleteNoteAsync(noteId, workItemId); // Thay đổi tham số
+            var result = await _noteApiService.DeleteNoteAsync(noteId, workItemId);
 
             if (result)
             {
@@ -133,6 +222,7 @@ namespace FrontEndDevExtreme.Controllers
                 return Json(new { success = false, message = "Có lỗi khi xóa ghi chú." });
             }
         }
+
 
 
 
