@@ -331,11 +331,11 @@
                         .ColumnAutoWidth(true)
                         .ColumnMinWidth(100)
                         .HoverStateEnabled(true)
-                        .Paging(p => p.PageSize(5))
+                        .Paging(p => p.PageSize(1000))
                         .Pager(p =>
                         {
                             p.ShowPageSizeSelector(true)
-                        .AllowedPageSizes(new[] { 5, 10, 20, 50 })
+                        .AllowedPageSizes(new[] { 500, 1000, 2000, 5000 })
                         .ShowInfo(true)
                         .ShowNavigationButtons(true);
                         })
