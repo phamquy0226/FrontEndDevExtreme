@@ -1,5 +1,28 @@
-﻿function addNote() {
-    const $textArea = $("#noteContent").dxTextArea("instance");
+﻿function initNotePopup() {
+    console.log("initNotePopup called");
+
+    $("#btnAddNotePop").off("click").on("click", addNotePop);
+    $("#noteContentPop").dxTextArea("instance").option("value", "");
+}
+
+function refreshNoteList() {
+    const container = $("#popupNoteContent");
+    container.html("<div class='text-muted'>Đang tải...</div>");
+
+    if (popupNote._workItemId) {
+        $.get(notePartialUrl, { workItemId: popupNote._workItemId }, function (html) {
+            container.html(html);
+            initNotePopup(); // Phải gọi lại sau khi load partial
+        }).fail(function () {
+            container.html("<div class='text-danger'>Không thể tải ghi chú.</div>");
+        });
+    } else {
+        container.html("<div class='text-warning'>Không có công việc được chọn.</div>");
+    }
+}
+
+function addNotePop() {
+    const $textArea = $("#noteContentPop").dxTextArea("instance");
     const content = $textArea.option("value")?.trim();
 
     if (!content) {
@@ -10,16 +33,17 @@
     $textArea.option("disabled", true);
 
     $.ajax({
-        url: '@Url.Action("AddNote", "WorkItem")',
+        url: addNoteUrl,
         method: "POST",
         data: {
-            workItemId: @workItemId,
+            workItemId: popupNote._workItemId,
             content: content
         },
         success: function (res) {
             if (res.success) {
                 DevExpress.ui.notify("Đã thêm ghi chú", "success", 2000);
-                window.location.reload();
+                $textArea.option("value", "");
+                refreshNoteList(); // gọi lại để load ghi chú mới
             } else {
                 DevExpress.ui.notify(res.message || "Thêm ghi chú thất bại", "error", 2000);
             }
@@ -31,14 +55,4 @@
             $textArea.option("disabled", false);
         }
     });
-}
-
-function initNotePopup() {
-    // Ví dụ: gán sự kiện click cho nút "Thêm ghi chú"
-    $("#btnAddNote").off("click").on("click", function () {
-        addNote();
-    });
-
-    // Nếu cần thiết, bạn cũng có thể reset textarea, hoặc làm gì đó khi mở popup
-    $("#noteContent").val("");
 }

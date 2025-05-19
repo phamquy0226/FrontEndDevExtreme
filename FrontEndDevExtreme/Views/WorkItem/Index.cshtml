@@ -314,7 +314,7 @@
 
 @section Scripts {
     <script src="~/js/create-workitem.js"></script>
-    <script src="~/js/note.js"></script>
+    
     <script>
         $(function () {
             const popup = $("#popupCreateWorkItem").dxPopup({
@@ -363,8 +363,12 @@
     </script>
 
     <script>
-                              $(function () {
-            const popupNote = $("#popupNote").dxPopup({
+        let popupNote; // ✅ Biến toàn cục
+    </script>
+
+    <script>
+        $(function () {
+            popupNote = $("#popupNote").dxPopup({
                 title: "Ghi chú",
                 width: "50%",
                 height: "100%",
@@ -392,7 +396,6 @@
                     }
                 },
                 contentTemplate: function (contentElement) {
-                    // Chỉ tạo 1 thẻ chứa nội dung
                     contentElement.append('<div id="popupNoteContent"><div class="text-muted">Chưa có nội dung.</div></div>');
                 },
                 onShown: function () {
@@ -402,7 +405,7 @@
                     if (popupNote._workItemId) {
                         $.get('@Url.Action("NotePartial", "WorkItem")', { workItemId: popupNote._workItemId }, function (html) {
                             container.html(html);
-                            initNotePopup(); // nếu có
+                            initNotePopup();
                         }).fail(function () {
                             container.html("<div class='text-danger'>Không thể tải ghi chú.</div>");
                         });
@@ -411,7 +414,6 @@
                     }
                 },
                 onHidden: function () {
-                    // Xóa ID và nội dung
                     popupNote._workItemId = undefined;
                     $("#popupNoteContent").empty();
                 }
@@ -426,6 +428,10 @@
             });
         });
     </script>
-
+    <script>
+        const addNoteUrl = '@Url.Action("AddNote", "WorkItem")';
+        const notePartialUrl = '@Url.Action("NotePartial", "WorkItem")';
+    </script>
+    <script src="~/js/note.js"></script>
 }
 
