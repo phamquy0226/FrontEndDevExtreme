@@ -1,0 +1,148 @@
+﻿@model FrontEndDevExtreme.Models.WorkItemCreateModel
+
+<form id="formCreateWorkItemPop" method="post" action="@Url.Action("Create", "WorkItem")">
+    <div id="workItemCreatePartial">
+        <div class="row">
+            <!-- Cột trái -->
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.TaskName)
+                    @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Loại công việc</label><br />
+                    @foreach (var type in new[] { "Tìm hiều", "Triển khai", "Báo cáo" })
+                    {
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(m => m.TaskType, type, new { @class = "form-check-input", id = $"TaskType-{type}" })
+                            <label class="form-check-label" for="TaskType-@type">@type</label>
+                        </div>
+                    }
+                    @Html.ValidationMessageFor(m => m.TaskType, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-check mb-3">
+                    @Html.CheckBoxFor(m => m.IsPinned, new { @class = "form-check-input", id = "IsPinned" })
+                    @Html.LabelFor(m => m.IsPinned, new { @class = "form-check-label" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Độ ưu tiên</label><br />
+                    @foreach (var item in new[] {
+                    new { Text = "Thấp", Value = 1 },
+                    new { Text = "Trung bình", Value = 2 },
+                    new { Text = "Cao", Value = 3 }
+                    })
+                    {
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(m => m.Priority, item.Value, new { @class = "form-check-input", id = $"Priority-{item.Value}" })
+                            <label class="form-check-label" for="Priority-@item.Value">@item.Text</label>
+                        </div>
+                    }
+                    @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- Cột phải -->
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label><br />
+                    @foreach (var item in new[] {
+                    new { Text = "Chưa thực hiện", Value = 0 },
+                    new { Text = "Đang thực hiện", Value = 1 },
+                    new { Text = "Đã xong", Value = 2 }
+                    })
+                    {
+                        <div class="form-check form-check-inline">
+                            @Html.RadioButtonFor(m => m.Status, item.Value, new { @class = "form-check-input", id = $"Status-{item.Value}" })
+                            <label class="form-check-label" for="Status-@item.Value">@item.Text</label>
+                        </div>
+                    }
+                    @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Progress)
+                    @Html.TextBoxFor(m => m.Progress, new { @class = "form-control", type = "number", min = "0", max = "100" })
+                    @Html.ValidationMessageFor(m => m.Progress, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.StartDate)
+                    @Html.TextBoxFor(m => m.StartDate, new
+                        {
+                            @class = "form-control",
+                            type = "date",
+                            value = (Model.StartDate == default ? DateTime.Today.ToString("yyyy-MM-dd") : Model.StartDate.ToString("yyyy-MM-dd"))
+                        })
+                    @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.EndDate)
+                    @Html.TextBoxFor(m => m.EndDate, new
+                        {
+                            @class = "form-control",
+                            type = "date",
+                            value = (Model.EndDate == default ? DateTime.Today.ToString("yyyy-MM-dd") : Model.EndDate.ToString("yyyy-MM-dd"))
+                        })
+                    @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Giao - nhận -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.AssignerID, "Người giao việc", new { @class = "form-label" })
+                    @Html.DropDownListFor(m => m.AssignerID, new SelectList(ViewBag.Users, "UserID", "UserName"), "Chọn người giao việc", new { @class = "form-select" })
+                    @Html.ValidationMessageFor(m => m.AssignerID, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Chọn phòng ban nhận</label>
+                    <div class="input-group mb-2">
+                        <select id="SelectedDepartmentID" class="form-select">
+                            <option value="">Chọn phòng ban</option>
+                            @foreach (var dept in ViewBag.Departments)
+                            {
+                                <option value="@dept.DepartmentID">@dept.DepartmentName</option>
+                            }
+                        </select>
+                        <button type="button" class="btn btn-outline-secondary" onclick="addDepartment()">Thêm</button>
+                    </div>
+                    <ul id="department-list" class="list-group"></ul>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Chọn người nhận công việc</label>
+                    <div class="input-group mb-2">
+                        <select id="SelectedUserID" class="form-select">
+                            <option value="">Chọn người</option>
+                            @foreach (var user in ViewBag.Users)
+                            {
+                                <option value="@user.UserID">@user.UserName</option>
+                            }
+                        </select>
+                        <button type="button" class="btn btn-outline-secondary" onclick="addUser()">Thêm</button>
+                    </div>
+                    <ul id="user-list" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút -->
+        <div class="d-flex justify-content-end mt-4">
+            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary me-2">Đóng</a>
+            <button type="submit" class="btn btn-primary">Tạo mới</button>
+        </div>
+    </div>
+</form>
+
+

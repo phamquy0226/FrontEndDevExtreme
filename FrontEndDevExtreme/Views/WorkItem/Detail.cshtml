@@ -1,106 +1,167 @@
 ﻿@model FrontEndDevExtreme.Models.WorkItemDetailModel
 
-<div class="card">
-    <div class="card-header">
-        Ghi chú
+@{
+    ViewData["Title"] = "Chi tiết công việc";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <!-- Cột trái: Thông tin công việc -->
+    <div class="col-md-6">
+        <div class="card p-3">
+            <dl class="row">
+                <dt class="col-sm-4">Tên công việc</dt>
+                <dd class="col-sm-8">@Model.TaskName</dd>
+
+                <dt class="col-sm-4">Trạng thái</dt>
+                <dd class="col-sm-8">
+                    @{
+                        var statusText = Model.Status switch
+                        {
+                            0 => "Chưa thực hiện",
+                            1 => "Đang thực hiện",
+                            2 => "Đã xong",
+                            _ => "Không xác định"
+                        };
+                    }
+                    @statusText
+                </dd>
+
+                <dt class="col-sm-4">Tiến độ</dt>
+                <dd class="col-sm-8">@Model.Progress%</dd>
+
+                <dt class="col-sm-4">Loại công việc</dt>
+                <dd class="col-sm-8">@Model.TaskType</dd>
+
+                <dt class="col-sm-4">Độ ưu tiên</dt>
+                <dd class="col-sm-8">
+                    @{
+                        var priorityText = Model.Priority switch
+                        {
+                            1 => "Thấp",
+                            2 => "Trung bình",
+                            3 => "Cao",
+                            _ => "Không xác định"
+                        };
+                        var priorityClass = Model.Priority switch
+                        {
+                            1 => "badge bg-success text-white",
+                            2 => "badge bg-warning text-dark",
+                            3 => "badge bg-danger text-white",
+                            _ => "badge bg-secondary"
+                        };
+                    }
+                    <span class="@priorityClass">@priorityText</span>
+                </dd>
+
+                <dt class="col-sm-4">Ghim</dt>
+                <dd class="col-sm-8">@((Model.IsPinned) ? "Có" : "Không")</dd>
+
+                <dt class="col-sm-4">Ngày bắt đầu</dt>
+                <dd class="col-sm-8">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-4">Ngày kết thúc</dt>
+                <dd class="col-sm-8">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-4">Người giao việc</dt>
+                <dd class="col-sm-8">@Model.AssignerName</dd>
+
+                <dt class="col-sm-4">Phòng ban nhận</dt>
+                <dd class="col-sm-8">
+                    @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                    {
+                        <div>@dept</div>
+                    }
+                </dd>
+
+                <dt class="col-sm-4">Người nhận</dt>
+                <dd class="col-sm-8">
+                    @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                    {
+                        <div>@user</div>
+                    }
+                </dd>
+            </dl>
+
+            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary mt-2">Đóng</a>
+        </div>
     </div>
-    <div class="card-body">
-        <div id="notesList">
-            @if (Model.Notes != null && Model.Notes.Any())
-            {
-                @foreach (var note in Model.Notes)
+
+    <!-- Cột phải: Ghi chú -->
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h4>Ghi chú</h4>
+
+            @(Html.DevExtreme().List()
+                .ID("noteList")
+                .DataSource(Model.Notes
+                .OrderByDescending(n => n.CreatedDate)
+                .Select(note => new
                 {
-                    <div class="note-item mb-2 p-2 border rounded">
-                        <p><strong>Ngày tạo:</strong> @note.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
-                        <p>@note.Content</p>
-                        <button class="btn btn-sm btn-danger delete-note-btn" data-note-id="@note.NoteID" data-workitem-id="@Model.WorkItemID">Xóa</button>
-                    </div>
-                }
-            }
-            else
-            {
-                <p>Không có ghi chú nào.</p>
-            }
+                    ID = note.NoteID,
+                    Text = $"{note.CreatedDate:dd/MM/yyyy HH:mm}: {note.Content}"
+                }))
+                .DisplayExpr("Text")
+                .KeyExpr("ID")
+                .SelectionMode(ListSelectionMode.None)
+                .ShowScrollbar(ShowScrollbarMode.Always)
+                .Height(200)
+                )
+
+            <div class="mt-3">
+                @(Html.DevExtreme().TextArea()
+                    .ID("noteContent")
+                    .Height(120)
+                    .Placeholder("Thêm ghi chú mới..."))
+            </div>
+
+            <div class="mt-2">
+                @(Html.DevExtreme().Button()
+                    .ID("btnAddNote")
+                    .Text("Thêm ghi chú")
+                    .Type(ButtonType.Success)
+                    .OnClick("addNote"))
+            </div>
         </div>
-        <div class="form-group mt-3">
-            <textarea id="newNoteContent" class="form-control" placeholder="Nhập ghi chú mới..."></textarea>
-        </div>
-        <button id="addNoteBtn" class="btn btn-primary">Thêm ghi chú</button>
     </div>
 </div>
 
-<script>
-    $(document).ready(function () {
-        var workItemId = @Model.WorkItemID; // Lấy WorkItemID từ model
+@section Scripts {
+    <script>
+        function addNote() {
+            const $textArea = $("#noteContent").dxTextArea("instance");
+            const content = $textArea.option("value")?.trim();
 
-        // Hàm để thêm ghi chú bằng AJAX
-        $("#addNoteBtn").click(function () {
-            var noteContent = $("#newNoteContent").val();
-            if (noteContent.trim() !== "") {
-                $.ajax({
-                    url: '/api/workitems/' + workItemId + '/notes', // Sử dụng route có workItemId
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        workItemId: workItemId, // Đã có trong biến workItemId
-                        content: noteContent
-                    }),
-                    success: function (response) {
-                        if (response.success) {
-                            // Thêm ghi chú mới vào danh sách hiển thị
-                            var newNoteHtml = `<div class="note-item mb-2 p-2 border rounded">
-                                                <p><strong>Ngày tạo:</strong> ${formatDate(response.data.createdDate)}</p>
-                                                <p>${response.data.content}</p>
-                                                <button class="btn btn-sm btn-danger delete-note-btn" data-note-id="${response.data.noteID}" data-workitem-id="${workItemId}">Xóa</button>
-                                              </div>`;
-                            $("#notesList").append(newNoteHtml);
-                            $("#newNoteContent").val(""); // Xóa nội dung textarea
-                            toastr.success("Thêm ghi chú thành công!"); // Sử dụng thư viện toastr để hiển thị thông báo
-                        } else {
-                            toastr.error("Lỗi: " + response.message);
-                        }
-                    },
-                    error: function () {
-                        toastr.error("Lỗi khi thêm ghi chú.");
-                    }
-                });
-            } else {
-                toastr.warning("Vui lòng nhập nội dung ghi chú.");
+            if (!content) {
+                DevExpress.ui.notify("Vui lòng nhập nội dung ghi chú", "warning", 2000);
+                return;
             }
-        });
 
-        // Hàm để xóa ghi chú bằng AJAX
-        $(document).on('click', '.delete-note-btn', function () {
-            var noteId = $(this).data('note-id');
-             var workItemId = $(this).data('workitem-id'); // Get workItemId from the button
-            var noteItem = $(this).closest('.note-item');
+            $textArea.option("disabled", true);
 
             $.ajax({
-                url: '/api/workitems/' + workItemId + '/notes/' + noteId, // Use the correct route
-                type: 'DELETE',
-                success: function (response) {
-                    if (response.success) {
-                        noteItem.remove(); // Xóa phần tử ghi chú khỏi DOM
-                        toastr.success("Xóa ghi chú thành công!");
+                url: '@Url.Action("AddNote", "WorkItem")',
+                method: "POST",
+                data: {
+                    workItemId: @Model.WorkItemID,
+                    content: content
+                },
+                success: function (res) {
+                    if (res.success) {
+                        DevExpress.ui.notify("Đã thêm ghi chú", "success", 2000);
+                        window.location.reload();
                     } else {
-                        toastr.error("Lỗi: " + response.message);
+                        DevExpress.ui.notify(res.message || "Thêm ghi chú thất bại", "error", 2000);
                     }
                 },
                 error: function () {
-                    toastr.error("Lỗi khi xóa ghi chú.");
+                    DevExpress.ui.notify("Lỗi khi gọi API", "error", 2000);
+                },
+                complete: function () {
+                    $textArea.option("disabled", false);
                 }
             });
-        });
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            var date = new Date(dateString);
-            var day = date.getDate().toString().padStart(2, '0');
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var year = date.getFullYear();
-            var hours = date.getHours().toString().padStart(2, '0');
-            var minutes = date.getMinutes().toString().padStart(2, '0');
-            return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
         }
-    });
-</script>
+    </script>
+}

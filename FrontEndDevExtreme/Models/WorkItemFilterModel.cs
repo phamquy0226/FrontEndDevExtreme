@@ -7,6 +7,7 @@
         public DateTime? StartDateFrom { get; set; }
         public DateTime? StartDateTo { get; set; }
         public DateTime? EndDateFrom { get; set; }
+        public DateTime? DateCreate { get; set; }
         public DateTime? EndDateTo { get; set; }
         public int? Status { get; set; }
         public int? DepartmentID { get; set; }

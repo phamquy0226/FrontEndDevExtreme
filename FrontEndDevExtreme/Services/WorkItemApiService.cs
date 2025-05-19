@@ -159,6 +159,30 @@ namespace FrontEndDevExtreme.Services
             }
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"/api/WorkItem/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Failed to delete work item, status code: " + response.StatusCode);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error calling DeleteAsync: " + ex.Message);
+                return false;
+            }
+        }
+
+
     }
 
     public class ResponseModel<T>
