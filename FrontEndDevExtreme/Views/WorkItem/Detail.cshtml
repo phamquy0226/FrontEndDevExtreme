@@ -1,5 +1,4 @@
-﻿@using DevExtreme.AspNet.Mvc
-@model FrontEndDevExtreme.Models.WorkItemDetailModel
+﻿@model FrontEndDevExtreme.Models.WorkItemDetailModel
 
 @{
     ViewData["Title"] = "Chi tiết công việc";
@@ -8,101 +7,92 @@
 <h2>@ViewData["Title"]</h2>
 
 <div class="row">
+    
     <div class="col-md-6">
-        @(Html.DevExtreme().Form()
-                .ID("workItemDetailsForm")
-                .ColCount(1)
-                .Items(items =>
-                {
-                    items.AddGroup()
-                .Caption("Thông tin công việc")
-                .Items(groupItems =>
-                {
-                    groupItems.AddSimpleFor(m => m.TaskName);
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Trạng thái"))
-                .Template(@<text>
-            @{
-            var statusText = Model.Status switch
-            {
-            0 => "Chưa thực hiện",
-            1 => "Đang thực hiện",
-            2 => "Đã xong",
-            _ => "Không xác định"
-            };
-            }
-            <div>@statusText</div>
-        </text>);
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Tiến độ"))
-                .Template(@<text>
-            <div>@Model.Progress%</div>
-        </text>);
-                    groupItems.AddSimpleFor(m => m.TaskType)
-                .Label(l => l.Text("Loại công việc"));
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Độ ưu tiên"))
-                .Template(@<text>
-            @{
-            var priorityText = Model.Priority switch
-            {
-            1 => "Thấp",
-            2 => "Trung bình",
-            3 => "Cao",
-            _ => "Không xác định"
-            };
-            var priorityClass = Model.Priority switch
-            {
-            1 => "badge bg-success text-white",
-            2 => "badge bg-warning text-dark",
-            3 => "badge bg-danger text-white",
-            _ => "badge bg-secondary"
-            };
-            }
-            <span class="@priorityClass">@priorityText</span>
-        </text>);
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Ghim"))
-                .Template(@<text>
-            <div>@((Model.IsPinned) ? "Có" : "Không")</div>
-        </text>);
-                    groupItems.AddSimpleFor(m => m.StartDate)
-                .Label(l => l.Text("Ngày bắt đầu"))
-                .Editor(e => e.DateBox().DisplayFormat("dd/MM/yyyy").ReadOnly(true));
-                    groupItems.AddSimpleFor(m => m.EndDate)
-                .Label(l => l.Text("Ngày kết thúc"))
-                .Editor(e => e.DateBox().DisplayFormat("dd/MM/yyyy").ReadOnly(true));
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Người giao việc"))
-                .Template(@<text>
-            <div>@Model.AssignerName</div>
-        </text>);
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Phòng ban nhận"))
-                .Template(@<text>
-            @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
-            {
-            <div>@dept</div>
-            }
-        </text>);
-                    groupItems.AddSimple()
-                .Label(l => l.Text("Người nhận"))
-                .Template(@<text>
-            @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
-            {
-            <div>@user</div>
-            }
-        </text>);
-                });
-                })
-            .StylingMode("outlined")
-            )
-        <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary mt-3">Đóng</a>
+        <div class="card p-3">
+            <dl class="row">
+                <dt class="col-sm-4">Tên công việc</dt>
+                <dd class="col-sm-8">@Model.TaskName</dd>
+
+                <dt class="col-sm-4">Trạng thái</dt>
+                <dd class="col-sm-8">
+                    @{
+                        var statusText = Model.Status switch
+                        {
+                            0 => "Chưa thực hiện",
+                            1 => "Đang thực hiện",
+                            2 => "Đã xong",
+                            _ => "Không xác định"
+                        };
+                    }
+                    @statusText
+                </dd>
+
+                <dt class="col-sm-4">Tiến độ</dt>
+                <dd class="col-sm-8">@Model.Progress%</dd>
+
+                <dt class="col-sm-4">Loại công việc</dt>
+                <dd class="col-sm-8">@Model.TaskType</dd>
+
+                <dt class="col-sm-4">Độ ưu tiên</dt>
+                <dd class="col-sm-8">
+                    @{
+                        var priorityText = Model.Priority switch
+                        {
+                            1 => "Thấp",
+                            2 => "Trung bình",
+                            3 => "Cao",
+                            _ => "Không xác định"
+                        };
+                        var priorityClass = Model.Priority switch
+                        {
+                            1 => "badge bg-success text-white",
+                            2 => "badge bg-warning text-dark",
+                            3 => "badge bg-danger text-white",
+                            _ => "badge bg-secondary"
+                        };
+                    }
+                    <span class="@priorityClass">@priorityText</span>
+                </dd>
+
+                <dt class="col-sm-4">Ghim</dt>
+                <dd class="col-sm-8">@((Model.IsPinned) ? "Có" : "Không")</dd>
+
+                <dt class="col-sm-4">Ngày bắt đầu</dt>
+                <dd class="col-sm-8">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-4">Ngày kết thúc</dt>
+                <dd class="col-sm-8">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-4">Người giao việc</dt>
+                <dd class="col-sm-8">@Model.AssignerName</dd>
+
+                <dt class="col-sm-4">Phòng ban nhận</dt>
+                <dd class="col-sm-8">
+                    @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                    {
+                        <div>@dept</div>
+                    }
+                </dd>
+
+                <dt class="col-sm-4">Người nhận</dt>
+                <dd class="col-sm-8">
+                    @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                    {
+                        <div>@user</div>
+                    }
+                </dd>
+            </dl>
+
+            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary mt-2">Đóng</a>
+        </div>
     </div>
 
-    <div class="col-md-6 mt-md-0 mt-3">
+    <!-- Cột phải: Ghi chú -->
+    <div class="col-md-6">
         <div class="card p-3">
             <h4>Ghi chú</h4>
+
             @(Html.DevExtreme().List()
                 .ID("noteList")
                 .DataSource(Model.Notes
@@ -114,7 +104,7 @@
                 }))
                 .DisplayExpr("Text")
                 .KeyExpr("ID")
-                .SelectionMode(DevExtreme.AspNet.Mvc.ListSelectionMode.None)
+                .SelectionMode(ListSelectionMode.None)
                 .ShowScrollbar(ShowScrollbarMode.Always)
                 .Height(200)
                 )
@@ -123,8 +113,7 @@
                 @(Html.DevExtreme().TextArea()
                     .ID("noteContent")
                     .Height(120)
-                    .Placeholder("Thêm ghi chú mới...")
-                    .StylingMode("outlined"))
+                    .Placeholder("Thêm ghi chú mới..."))
             </div>
 
             <div class="mt-2">
@@ -132,7 +121,6 @@
                     .ID("btnAddNote")
                     .Text("Thêm ghi chú")
                     .Type(ButtonType.Success)
-                    .StylingMode("contained")
                     .OnClick("addNote"))
             </div>
         </div>

@@ -63,7 +63,7 @@
                 <div class="mb-3">
                     <label class="form-label">Loại công việc</label>
                     <div>
-                        @foreach (var type in new[] { "Tìm hiều", "Triển khai", "Báo cáo" })
+                        @foreach (var type in new[] { "Research", ",Deploy", "Report" })
                         {
                             <div class="form-check form-check-inline">
                                 @Html.RadioButtonFor(m => m.TaskType, type, new { @class = "form-check-input", id = $"TaskType-{type}" })
