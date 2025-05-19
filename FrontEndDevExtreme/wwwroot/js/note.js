@@ -56,3 +56,22 @@ function addNotePop() {
         }
     });
 }
+
+
+$(document).on("click", ".btn-delete-note", function () {
+    const noteId = $(this).data("note-id");
+    const workItemId = $(this).data("work-item-id");
+
+    if (confirm("Bạn có chắc muốn xoá ghi chú này?")) {
+        $.post("/Note/DeleteNote", { noteId, workItemId }, function (res) {
+            if (res.success) {
+                DevExpress.ui.notify("Đã xoá ghi chú", "success", 2000);
+                refreshNoteList(); // Gọi lại để load ghi chú mới
+            } else {
+                DevExpress.ui.notify(res.message || "Xoá ghi chú thất bại", "error", 2000);
+            }
+        }).fail(() => {
+            DevExpress.ui.notify("Lỗi khi gọi API xoá", "error", 2000);
+        });
+    }
+});

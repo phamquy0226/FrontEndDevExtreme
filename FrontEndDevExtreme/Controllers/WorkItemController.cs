@@ -83,7 +83,7 @@ namespace FrontEndDevExtreme.Controllers
             ViewBag.Users = users;
             ViewBag.Departments = departments;
 
-            // Trả về PartialView cho popup load
+            
             return PartialView("_CreateWorkItemPartial", new WorkItemCreateModel());
         }
 
@@ -91,15 +91,14 @@ namespace FrontEndDevExtreme.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePopUp([FromForm] WorkItemCreateModel model)
         {
-            // Gộp dữ liệu từ các input hidden thành danh sách ID
+           
             var departmentIds = Request.Form["DepartmentIDs"].ToList();
             var userIds = Request.Form["UserIDs"].ToList();
 
-            // Gán lại danh sách ID cho model
+           
             model.DepartmentIDs = departmentIds.Select(int.Parse).ToList();
             model.UserIDs = userIds.Select(int.Parse).ToList();
 
-            // Kiểm tra hợp lệ model
             if (!ModelState.IsValid)
             {
                 return Json(new
@@ -112,7 +111,7 @@ namespace FrontEndDevExtreme.Controllers
                 });
             }
 
-            // Gọi API tạo mới công việc
+            
             var result = await _workItemApiService.CreateAsync(model);
             if (result)
             {
@@ -141,13 +140,13 @@ namespace FrontEndDevExtreme.Controllers
         {
             var noteModels = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId);
 
-            // Chuyển sang NoteViewModel
+            
             var noteViewModels = noteModels.Select(n => new NoteViewModel
             {
                 NoteID = n.NoteID,
                 Content = n.Content,
                 CreatedDate = n.CreatedDate,
-                // các field khác nếu có
+               
             }).ToList();
 
             return PartialView("_NotePartial", noteViewModels);
@@ -159,7 +158,7 @@ namespace FrontEndDevExtreme.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNote(int workItemId, string content)
         {
-            // Kiểm tra nội dung ghi chú không trống
+            
             if (string.IsNullOrEmpty(content))
             {
                 return Json(new { success = false, message = "Nội dung ghi chú không thể để trống." });
@@ -167,12 +166,12 @@ namespace FrontEndDevExtreme.Controllers
 
             try
             {
-                // Thêm ghi chú vào cơ sở dữ liệu
+                
                 var result = await _noteApiService.AddNoteAsync(workItemId, content);
 
                 if (result)
                 {
-                    // Lấy danh sách ghi chú mới nhất sau khi thêm
+                    
                     var newNote = await _noteApiService.GetNotesByWorkItemIdAsync(workItemId);
                     var lastNote = newNote.LastOrDefault();
 
@@ -201,7 +200,7 @@ namespace FrontEndDevExtreme.Controllers
             }
             catch (Exception ex)
             {
-                // Log exception (nếu cần thiết)
+                
                 return Json(new { success = false, message = "Đã có lỗi xảy ra, vui lòng thử lại sau." });
             }
         }

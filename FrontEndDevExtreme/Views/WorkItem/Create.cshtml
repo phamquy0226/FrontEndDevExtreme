@@ -4,234 +4,551 @@
     ViewData["Title"] = "Tạo công việc mới";
 }
 
-<h2>@ViewData["Title"]</h2>
+<!-- DevExtreme theme và CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/devextreme/23.1.6/css/dx.light.css">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
 
-@using (Html.BeginForm("Create", "WorkItem", FormMethod.Post, new { id = "createWorkItemForm" }))
-{
-    <div class="row">
-        <!-- Cột trái -->
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(m => m.TaskName)
-                @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                @Html.Label("Loại công việc")
-                <br />
-                @foreach (var type in new[] { "Tìm hiều", "Triển khai", "Báo cáo" })
-                {
-                    <div class="form-check form-check-inline">
-                        @Html.RadioButtonFor(m => m.TaskType, type, new { @class = "form-check-input", id = $"TaskType-{type}" })
-                        <label class="form-check-label" for="TaskType-@type">@type</label>
-                    </div>
-                }
-                @Html.ValidationMessageFor(m => m.TaskType, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group form-check">
-                @Html.CheckBoxFor(m => m.IsPinned, new { @class = "form-check-input", id = "IsPinned" })
-                @Html.LabelFor(m => m.IsPinned, new { @class = "form-check-label" })
-            </div>
-
-            <div class="form-group">
-                @Html.Label("Độ ưu tiên")
-                <br />
-                @foreach (var item in new[] {
-            new { Text = "Thấp", Value = 1 },
-            new { Text = "Trung bình", Value = 2 },
-            new { Text = "Cao", Value = 3 }
-            })
-                {
-                    <div class="form-check form-check-inline">
-                        @Html.RadioButtonFor(m => m.Priority, item.Value, new { @class = "form-check-input", id = $"Priority-{item.Value}" })
-                        <label class="form-check-label" for="Priority-@item.Value">@item.Text</label>
-                    </div>
-                }
-                @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
-            </div>
+<div class="container-fluid px-4 py-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>@ViewData["Title"]</h4>
         </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Create", "WorkItem", FormMethod.Post, new { id = "createWorkItemForm" }))
+            {
+                <div class="row g-4">
+                    <!-- Cột bên trái -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Thông tin cơ bản</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    @Html.LabelFor(m => m.TaskName, new { @class = "form-label fw-bold" })
+                                    <div id="taskName"></div>
+                                    @Html.HiddenFor(m => m.TaskName)
+                                    @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
+                                </div>
 
-        <!-- Cột phải -->
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.Label("Trạng thái")
-                <br />
-                @foreach (var item in new[] {
-            new { Text = "Chưa thực hiện", Value = 0 },
-            new { Text = "Đang thực hiện", Value = 1 },
-            new { Text = "Đã xong", Value = 2 }
-            })
-                {
-                    <div class="form-check form-check-inline">
-                        @Html.RadioButtonFor(m => m.Status, item.Value, new { @class = "form-check-input", id = $"Status-{item.Value}" })
-                        <label class="form-check-label" for="Status-@item.Value">@item.Text</label>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Loại công việc</label>
+                                    <div id="taskTypeSelector"></div>
+                                    @Html.HiddenFor(m => m.TaskType)
+                                    @Html.ValidationMessageFor(m => m.TaskType, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="mb-4">
+                                    <div id="isPinnedSwitch" class="dx-field">
+                                        <div class="dx-field-label fw-bold">Ghim công việc</div>
+                                        <div class="dx-field-value">
+                                            @Html.HiddenFor(m => m.IsPinned)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Độ ưu tiên</label>
+                                    <div id="prioritySelector"></div>
+                                    @Html.HiddenFor(m => m.Priority)
+                                    @Html.ValidationMessageFor(m => m.Priority, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                }
-                @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
-            </div>
 
-            <div class="form-group">
-                @Html.LabelFor(m => m.Progress)
-                @Html.TextBoxFor(m => m.Progress, new { @class = "form-control", type = "number", min = "0", max = "100" })
-                @Html.ValidationMessageFor(m => m.Progress, "", new { @class = "text-danger" })
-            </div>
+                    <!-- Cột bên phải -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Trạng thái & Thời gian</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Trạng thái</label>
+                                    <div id="statusSelector"></div>
+                                    @Html.HiddenFor(m => m.Status)
+                                    @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger" })
+                                </div>
 
-            <div class="form-group">
-                @Html.LabelFor(m => m.StartDate)
-                @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
-            </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">@Html.LabelFor(m => m.Progress)</label>
+                                    <div id="progressSlider"></div>
+                                    @Html.HiddenFor(m => m.Progress)
+                                    @Html.ValidationMessageFor(m => m.Progress, "", new { @class = "text-danger" })
+                                </div>
 
-            <div class="form-group">
-                @Html.LabelFor(m => m.EndDate)
-                @Html.TextBoxFor(m => m.EndDate, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
-            </div>
-        </div>
-    </div>
+                                <div class="mb-4">
+                                    @Html.LabelFor(m => m.StartDate, new { @class = "form-label fw-bold" })
+                                    <div id="startDatePicker"></div>
+                                    @Html.HiddenFor(m => m.StartDate)
+                                    @Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })
+                                </div>
 
-    <!-- Giao - nhận -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                @Html.LabelFor(m => m.AssignerID, "Người giao việc")
-                @Html.DropDownListFor(m => m.AssignerID, new SelectList(ViewBag.Users, "UserID", "UserName"), "Chọn người giao việc", new { @class = "form-control" })
-                @Html.ValidationMessageFor(m => m.AssignerID, "", new { @class = "text-danger" })
-            </div>
-
-            <div class="form-group">
-                <label>Chọn phòng ban nhận</label>
-                <div class="input-group">
-                    <select id="SelectedDepartmentID" class="form-control">
-                        <option value="">Chọn phòng ban</option>
-                        @foreach (var dept in ViewBag.Departments)
-                        {
-                            <option value="@dept.DepartmentID">@dept.DepartmentName</option>
-                        }
-                    </select>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-secondary" onclick="addDepartment()">Thêm</button>
+                                <div class="mb-4">
+                                    @Html.LabelFor(m => m.EndDate, new { @class = "form-label fw-bold" })
+                                    <div id="endDatePicker"></div>
+                                    @Html.HiddenFor(m => m.EndDate)
+                                    @Html.ValidationMessageFor(m => m.EndDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <ul id="department-list" class="mt-2"></ul>
-            </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="form-group">
-                <label>Chọn người nhận công việc</label>
-                <div class="input-group">
-                    <select id="SelectedUserID" class="form-control">
-                        <option value="">Chọn người</option>
-                        @foreach (var user in ViewBag.Users)
-                        {
-                            <option value="@user.UserID">@user.UserName</option>
-                        }
-                    </select>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-secondary" onclick="addUser()">Thêm</button>
+                <!-- Phần phân công -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-people me-2"></i>Phân công công việc</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-md-4">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Người giao việc</label>
+                                            <div id="assignerSelector"></div>
+                                            @Html.HiddenFor(m => m.AssignerID)
+                                            @Html.ValidationMessageFor(m => m.AssignerID, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Phòng ban nhận việc</label>
+                                            <div id="departmentSelector"></div>
+                                            <div id="departmentList" class="mt-3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold">Người nhận việc</label>
+                                            <div id="userSelector"></div>
+                                            <div id="userList" class="mt-3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <ul id="user-list" class="mt-2"></ul>
-            </div>
+
+                <!-- Nút lệnh -->
+                <div class="d-flex justify-content-end mt-4 gap-2">
+                    <a href="@Url.Action("Index", "WorkItem")" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-x-circle me-2"></i>Đóng
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4" id="submitButton">
+                        <i class="bi bi-check-circle me-2"></i>Tạo mới
+                    </button>
+                </div>
+            }
         </div>
     </div>
-
-    <!-- Nút -->
-    <div class="form-group text-right mt-3">
-        <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary">Đóng</a>
-        <button type="submit" class="btn btn-primary ml-2">Tạo mới</button>
-    </div>
-}
-
+</div>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DevExtreme JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/devextreme/23.1.6/js/dx.all.js"></script>
     <script>
         var selectedDepartments = [];
         var selectedUsers = [];
 
-        function addDepartment() {
-            var selected = $("#SelectedDepartmentID").val();
-            var text = $("#SelectedDepartmentID option:selected").text();
-            if (selected && !selectedDepartments.includes(selected)) {
-                selectedDepartments.push(selected);
-                $("#department-list").append(
-                    `<li data-id="${selected}">${text}
-                        <a href="#" onclick="removeDepartment('${selected}'); return false;">[x]</a>
-                        <input type="hidden" name="DepartmentIDs" value="${selected}" />
-                    </li>`);
+        $(function() {
+            // Tên công việc
+            var taskName = $("#taskName").dxTextBox({
+                value: "",
+                placeholder: "Nhập tên công việc",
+                stylingMode: "filled",
+                onValueChanged: function(e) {
+                    $("#TaskName").val(e.value);
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "Vui lòng nhập tên công việc"
+                }]
+            }).dxTextBox("instance");
+
+            // Loại công việc
+            var taskTypeItems = ["Tìm hiều", "Triển khai", "Báo cáo"];
+            var taskTypeSelector = $("#taskTypeSelector").dxRadioGroup({
+                items: taskTypeItems,
+                layout: "horizontal",
+                value: taskTypeItems[0],
+                onValueChanged: function(e) {
+                    $("#TaskType").val(e.value);
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "Vui lòng chọn loại công việc"
+                }]
+            }).dxRadioGroup("instance");
+
+            // Ghim công việc
+            $("#isPinnedSwitch .dx-field-value").dxSwitch({
+                value: false,
+                switchedOnText: "Có",
+                switchedOffText: "Không",
+                onValueChanged: function(e) {
+                    $("#IsPinned").val(e.value);
+                }
+            });
+
+            // Độ ưu tiên
+            var priorityItems = [
+                { text: "Thấp", value: 1, color: "#28a745" },
+                { text: "Trung bình", value: 2, color: "#ffc107" },
+                { text: "Cao", value: 3, color: "#dc3545" }
+            ];
+            var prioritySelector = $("#prioritySelector").dxRadioGroup({
+                items: priorityItems,
+                displayExpr: "text",
+                valueExpr: "value",
+                layout: "horizontal",
+                value: 1,
+                itemTemplate: function(itemData) {
+                    return $("<div>").append(
+                        $("<span>").text(itemData.text).prepend(
+                            $("<i>").addClass("bi bi-circle-fill me-2").css("color", itemData.color)
+                        )
+                    );
+                },
+                onValueChanged: function(e) {
+                    $("#Priority").val(e.value);
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "Vui lòng chọn độ ưu tiên"
+                }]
+            }).dxRadioGroup("instance");
+
+            // Trạng thái
+            var statusItems = [
+                { text: "Chưa thực hiện", value: 0, icon: "bi bi-clock text-secondary" },
+                { text: "Đang thực hiện", value: 1, icon: "bi bi-play-circle text-primary" },
+                { text: "Đã xong", value: 2, icon: "bi bi-check-circle text-success" }
+            ];
+            var statusSelector = $("#statusSelector").dxRadioGroup({
+                items: statusItems,
+                displayExpr: "text",
+                valueExpr: "value",
+                layout: "horizontal",
+                value: 0,
+                itemTemplate: function(itemData) {
+                    return $("<div>").append(
+                        $("<span>").text(itemData.text).prepend(
+                            $("<i>").addClass(itemData.icon + " me-2")
+                        )
+                    );
+                },
+                onValueChanged: function(e) {
+                    $("#Status").val(e.value);
+                    updateProgressByStatus(e.value);
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "Vui lòng chọn trạng thái"
+                }]
+            }).dxRadioGroup("instance");
+
+            // Tiến độ
+            var progressSlider = $("#progressSlider").dxSlider({
+                min: 0,
+                max: 100,
+                value: 0,
+                step: 5,
+                tooltip: {
+                    enabled: true,
+                    format: function(value) {
+                        return value + "%";
+                    },
+                    showMode: "always",
+                    position: "top"
+                },
+                label: {
+                    visible: false
+                },
+                onValueChanged: function(e) {
+                    $("#Progress").val(e.value);
+                    updateStatusByProgress(e.value);
+                }
+            }).dxSlider("instance");
+
+            // Ngày bắt đầu
+            var now = new Date();
+            var startDatePicker = $("#startDatePicker").dxDateBox({
+                type: "date",
+                value: now,
+                displayFormat: "dd/MM/yyyy",
+                stylingMode: "filled",
+                onValueChanged: function(e) {
+                    $("#StartDate").val(formatDate(e.value));
+                    endDatePicker.option("min", e.value);
+                }
+            }).dxDateBox("instance");
+
+            // Ngày kết thúc
+            var nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            var endDatePicker = $("#endDatePicker").dxDateBox({
+                type: "date",
+                value: nextWeek,
+                displayFormat: "dd/MM/yyyy",
+                min: now,
+                stylingMode: "filled",
+                onValueChanged: function(e) {
+                    $("#EndDate").val(formatDate(e.value));
+                }
+            }).dxDateBox("instance");
+
+            // Người giao việc
+            var users = @Html.Raw(Json.Serialize(ViewBag.Users));
+            var assignerSelector = $("#assignerSelector").dxSelectBox({
+                dataSource: users,
+                displayExpr: "UserName",
+                valueExpr: "UserID",
+                placeholder: "Chọn người giao việc",
+                stylingMode: "filled",
+                showClearButton: true,
+                onValueChanged: function(e) {
+                    $("#AssignerID").val(e.value);
+                }
+            }).dxValidator({
+                validationRules: [{
+                    type: "required",
+                    message: "Vui lòng chọn người giao việc"
+                }]
+            }).dxSelectBox("instance");
+
+            // Phòng ban
+            var departments = @Html.Raw(Json.Serialize(ViewBag.Departments));
+            var departmentSelector = $("#departmentSelector").dxSelectBox({
+                dataSource: departments,
+                displayExpr: "DepartmentName",
+                valueExpr: "DepartmentID",
+                placeholder: "Chọn phòng ban",
+                stylingMode: "filled",
+                showClearButton: true,
+                buttons: [{
+                    name: "add",
+                    location: "after",
+                    options: {
+                        icon: "add",
+                        type: "default",
+                        onClick: function() {
+                            addDepartment(departmentSelector.option("selectedItem"));
+                        }
+                    }
+                }]
+            }).dxSelectBox("instance");
+
+            // Người nhận việc
+            var userSelector = $("#userSelector").dxSelectBox({
+                dataSource: users,
+                displayExpr: "UserName",
+                valueExpr: "UserID",
+                placeholder: "Chọn người nhận việc",
+                stylingMode: "filled",
+                showClearButton: true,
+                buttons: [{
+                    name: "add",
+                    location: "after",
+                    options: {
+                        icon: "add",
+                        type: "default",
+                        onClick: function() {
+                            addUser(userSelector.option("selectedItem"));
+                        }
+                    }
+                }]
+            }).dxSelectBox("instance");
+
+            // Nút submit
+            $("#submitButton").dxButton({
+                text: "Tạo mới",
+                type: "success",
+                icon: "check",
+                useSubmitBehavior: true
+            });
+
+            // Cập nhật giá trị ban đầu
+            $("#TaskName").val(taskName.option("value"));
+            $("#TaskType").val(taskTypeSelector.option("value"));
+            $("#Priority").val(prioritySelector.option("value"));
+            $("#Status").val(statusSelector.option("value"));
+            $("#Progress").val(progressSlider.option("value"));
+            $("#StartDate").val(formatDate(startDatePicker.option("value")));
+            $("#EndDate").val(formatDate(endDatePicker.option("value")));
+
+            // Hiển thị danh sách chọn
+            refreshDepartmentList();
+            refreshUserList();
+
+            // Hiển thị form validation
+            $("#createWorkItemForm").dxValidationSummary({});
+        });
+
+        // Hàm format ngày theo định dạng yyyy-MM-dd
+        function formatDate(date) {
+            if (!date) return "";
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+        // Cập nhật trạng thái dựa trên tiến độ
+        function updateStatusByProgress(progress) {
+            var statusSelector = $("#statusSelector").dxRadioGroup("instance");
+            var currentStatus = statusSelector.option("value");
+
+            if (progress <= 0) {
+                if (currentStatus !== 0) {
+                    statusSelector.option("value", 0);
+                }
+            } else if (progress >= 100) {
+                if (currentStatus !== 2) {
+                    statusSelector.option("value", 2);
+                }
+            } else {
+                if (currentStatus !== 1) {
+                    statusSelector.option("value", 1);
+                }
             }
         }
 
+        // Cập nhật tiến độ dựa trên trạng thái
+        function updateProgressByStatus(status) {
+            var progressSlider = $("#progressSlider").dxSlider("instance");
+            
+            if (status === 0) {
+                progressSlider.option("value", 0);
+                progressSlider.option("disabled", false);
+            } else if (status === 1) {
+                if (progressSlider.option("value") <= 0) {
+                    progressSlider.option("value", 50);
+                }
+                progressSlider.option("disabled", false);
+            } else if (status === 2) {
+                progressSlider.option("value", 100);
+                progressSlider.option("disabled", true);
+            }
+        }
+
+        // Thêm phòng ban
+        function addDepartment(dept) {
+            if (!dept || selectedDepartments.includes(dept.DepartmentID)) return;
+            
+            selectedDepartments.push(dept.DepartmentID);
+            refreshDepartmentList();
+        }
+
+        // Xóa phòng ban
         function removeDepartment(id) {
             selectedDepartments = selectedDepartments.filter(x => x !== id);
-            $(`#department-list li[data-id='${id}']`).remove();
+            refreshDepartmentList();
         }
 
-        function addUser() {
-            var selected = $("#SelectedUserID").val();
-            var text = $("#SelectedUserID option:selected").text();
-            if (selected && !selectedUsers.includes(selected)) {
-                selectedUsers.push(selected);
-                $("#user-list").append(
-                    `<li data-id="${selected}">${text}
-                        <a href="#" onclick="removeUser('${selected}'); return false;">[x]</a>
-                        <input type="hidden" name="UserIDs" value="${selected}" />
-                    </li>`);
+        // Cập nhật hiển thị danh sách phòng ban
+        function refreshDepartmentList() {
+            var departments = @Html.Raw(Json.Serialize(ViewBag.Departments));
+            var $list = $("#departmentList");
+            $list.empty();
+            
+            if (selectedDepartments.length > 0) {
+                var $listGroup = $("<div>").addClass("list-group");
+                
+                selectedDepartments.forEach(function(deptId) {
+                    var dept = departments.find(d => d.DepartmentID === deptId);
+                    if (!dept) return;
+                    
+                    var $item = $("<div>").addClass("list-group-item d-flex justify-content-between align-items-center");
+                    $item.append(
+                        $("<span>").append(
+                            $("<i>").addClass("bi bi-building me-2"),
+                            $("<span>").text(dept.DepartmentName)
+                        ),
+                        $("<button>").addClass("btn btn-sm btn-outline-danger")
+                            .append($("<i>").addClass("bi bi-x"))
+                            .on("click", function() { removeDepartment(deptId); }),
+                        $("<input>").attr({
+                            type: "hidden",
+                            name: "DepartmentIDs",
+                            value: deptId
+                        })
+                    );
+                    
+                    $listGroup.append($item);
+                });
+                
+                $list.append($listGroup);
+            } else {
+                $list.append($("<div>").addClass("text-muted fst-italic").text("Chưa chọn phòng ban nào"));
             }
         }
 
+        // Thêm người dùng
+        function addUser(user) {
+            if (!user || selectedUsers.includes(user.UserID)) return;
+            
+            selectedUsers.push(user.UserID);
+            refreshUserList();
+        }
+
+        // Xóa người dùng
         function removeUser(id) {
             selectedUsers = selectedUsers.filter(x => x !== id);
-            $(`#user-list li[data-id='${id}']`).remove();
+            refreshUserList();
         }
 
-        // Hàm cập nhật trạng thái theo tiến độ
-        function updateStatusByProgress() {
-            var progress = parseInt($("input[name='Progress']").val());
-
-            if (isNaN(progress) || progress <= 0) {
-                $("input[name='Status'][value='0']").prop("checked", true); // Chưa thực hiện
-            } else if (progress >= 100) {
-                $("input[name='Status'][value='2']").prop("checked", true); // Đã xong
+        // Cập nhật hiển thị danh sách người dùng
+        function refreshUserList() {
+            var users = @Html.Raw(Json.Serialize(ViewBag.Users));
+            var $list = $("#userList");
+            $list.empty();
+            
+            if (selectedUsers.length > 0) {
+                var $listGroup = $("<div>").addClass("list-group");
+                
+                selectedUsers.forEach(function(userId) {
+                    var user = users.find(u => u.UserID === userId);
+                    if (!user) return;
+                    
+                    var $item = $("<div>").addClass("list-group-item d-flex justify-content-between align-items-center");
+                    $item.append(
+                        $("<span>").append(
+                            $("<i>").addClass("bi bi-person me-2"),
+                            $("<span>").text(user.UserName)
+                        ),
+                        $("<button>").addClass("btn btn-sm btn-outline-danger")
+                            .append($("<i>").addClass("bi bi-x"))
+                            .on("click", function() { removeUser(userId); }),
+                        $("<input>").attr({
+                            type: "hidden",
+                            name: "UserIDs",
+                            value: userId
+                        })
+                    );
+                    
+                    $listGroup.append($item);
+                });
+                
+                $list.append($listGroup);
             } else {
-                $("input[name='Status'][value='1']").prop("checked", true); // Đang thực hiện
+                $list.append($("<div>").addClass("text-muted fst-italic").text("Chưa chọn người nhận nào"));
             }
         }
-
-        // Hàm cập nhật tiến độ theo trạng thái
-        function updateProgressByStatus() {
-            var status = $("input[name='Status']:checked").val();
-            var $progress = $("input[name='Progress']");
-
-            if (status === "0") { // Chưa thực hiện
-                $progress.val(0);
-                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Chưa thực hiện
-            } else if (status === "1") { // Đang thực hiện
-                $progress.prop("readonly", false); // Cho phép chỉnh sửa tiến độ khi trạng thái là Đang thực hiện
-            } else if (status === "2") { // Đã xong
-                $progress.val(100);
-                $progress.prop("readonly", true); // Không cho phép chỉnh sửa tiến độ khi trạng thái là Đã xong
-            }
-        }
-
-        $(document).ready(function () {
-            // Gán sự kiện thay đổi khi thay đổi tiến độ
-            $("input[name='Progress']").on('input', function () {
-                updateStatusByProgress();
-            });
-
-            // Gán sự kiện khi chọn trạng thái
-            $("input[name='Status']").change(function () {
-                updateProgressByStatus();
-            });
-
-            // Khởi tạo trạng thái và tiến độ ban đầu
-            updateProgressByStatus();
-            updateStatusByProgress();
-        });
     </script>
+
 }
