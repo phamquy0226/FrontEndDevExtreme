@@ -4,124 +4,201 @@
     ViewData["Title"] = "Chi tiết công việc";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="row">
-    
-    <div class="col-md-6">
-        <div class="card p-3">
-            <dl class="row">
-                <dt class="col-sm-4">Tên công việc</dt>
-                <dd class="col-sm-8">@Model.TaskName</dd>
-
-                <dt class="col-sm-4">Trạng thái</dt>
-                <dd class="col-sm-8">
-                    @{
-                        var statusText = Model.Status switch
-                        {
-                            0 => "Chưa thực hiện",
-                            1 => "Đang thực hiện",
-                            2 => "Đã xong",
-                            _ => "Không xác định"
-                        };
-                    }
-                    @statusText
-                </dd>
-
-                <dt class="col-sm-4">Tiến độ</dt>
-                <dd class="col-sm-8">@Model.Progress%</dd>
-
-                <dt class="col-sm-4">Loại công việc</dt>
-                <dd class="col-sm-8">@Model.TaskType</dd>
-
-                <dt class="col-sm-4">Độ ưu tiên</dt>
-                <dd class="col-sm-8">
-                    @{
-                        var priorityText = Model.Priority switch
-                        {
-                            1 => "Thấp",
-                            2 => "Trung bình",
-                            3 => "Cao",
-                            _ => "Không xác định"
-                        };
-                        var priorityClass = Model.Priority switch
-                        {
-                            1 => "badge bg-success text-white",
-                            2 => "badge bg-warning text-dark",
-                            3 => "badge bg-danger text-white",
-                            _ => "badge bg-secondary"
-                        };
-                    }
-                    <span class="@priorityClass">@priorityText</span>
-                </dd>
-
-                <dt class="col-sm-4">Ghim</dt>
-                <dd class="col-sm-8">@((Model.IsPinned) ? "Có" : "Không")</dd>
-
-                <dt class="col-sm-4">Ngày bắt đầu</dt>
-                <dd class="col-sm-8">@Model.StartDate.ToString("dd/MM/yyyy")</dd>
-
-                <dt class="col-sm-4">Ngày kết thúc</dt>
-                <dd class="col-sm-8">@Model.EndDate.ToString("dd/MM/yyyy")</dd>
-
-                <dt class="col-sm-4">Người giao việc</dt>
-                <dd class="col-sm-8">@Model.AssignerName</dd>
-
-                <dt class="col-sm-4">Phòng ban nhận</dt>
-                <dd class="col-sm-8">
-                    @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
-                    {
-                        <div>@dept</div>
-                    }
-                </dd>
-
-                <dt class="col-sm-4">Người nhận</dt>
-                <dd class="col-sm-8">
-                    @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
-                    {
-                        <div>@user</div>
-                    }
-                </dd>
-            </dl>
-
-            <a href="@Url.Action("Index", "WorkItem")" class="btn btn-secondary mt-2">Đóng</a>
-        </div>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">@ViewData["Title"]</h2>
+        <a href="@Url.Action("Index", "WorkItem")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
     </div>
 
-    <!-- Cột phải: Ghi chú -->
-    <div class="col-md-6">
-        <div class="card p-3">
-            <h4>Ghi chú</h4>
+    <div class="row g-4">
+        <!-- Cột trái: Thông tin chi tiết -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h4 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-tasks me-2 text-primary"></i>
+                        @Model.TaskName
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-light">
+                                <h5 class="border-bottom pb-2 fw-bold text-secondary">Thông tin chung</h5>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5 text-muted">Trạng thái</dt>
+                                    <dd class="col-sm-7">
+                                        @{
+                                            var statusText = Model.Status switch
+                                            {
+                                                0 => "Chưa thực hiện",
+                                                1 => "Đang thực hiện",
+                                                2 => "Đã xong",
+                                                _ => "Không xác định"
+                                            };
+                                            var statusClass = Model.Status switch
+                                            {
+                                                0 => "badge bg-secondary",
+                                                1 => "badge bg-info",
+                                                2 => "badge bg-success",
+                                                _ => "badge bg-light text-dark"
+                                            };
+                                        }
+                                        <span class="@statusClass">@statusText</span>
+                                    </dd>
 
-            @(Html.DevExtreme().List()
-                .ID("noteList")
-                .DataSource(Model.Notes
-                .OrderByDescending(n => n.CreatedDate)
-                .Select(note => new
-                {
-                    ID = note.NoteID,
-                    Text = $"{note.CreatedDate:dd/MM/yyyy HH:mm}: {note.Content}"
-                }))
-                .DisplayExpr("Text")
-                .KeyExpr("ID")
-                .SelectionMode(ListSelectionMode.None)
-                .ShowScrollbar(ShowScrollbarMode.Always)
-                .Height(200)
-                )
+                                    <dt class="col-sm-5 text-muted">Tiến độ</dt>
+                                    <dd class="col-sm-7">
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.Progress%" aria-valuenow="@Model.Progress" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted mt-1 d-inline-block">@Model.Progress%</small>
+                                    </dd>
 
-            <div class="mt-3">
-                @(Html.DevExtreme().TextArea()
-                    .ID("noteContent")
-                    .Height(120)
-                    .Placeholder("Thêm ghi chú mới..."))
+                                    <dt class="col-sm-5 text-muted">Loại công việc</dt>
+                                    <dd class="col-sm-7">@Model.TaskType</dd>
+
+                                    <dt class="col-sm-5 text-muted">Độ ưu tiên</dt>
+                                    <dd class="col-sm-7">
+                                        @{
+                                            var priorityText = Model.Priority switch
+                                            {
+                                                1 => "Thấp",
+                                                2 => "Trung bình",
+                                                3 => "Cao",
+                                                _ => "Không xác định"
+                                            };
+                                            var priorityClass = Model.Priority switch
+                                            {
+                                                1 => "badge bg-success",
+                                                2 => "badge bg-warning text-dark",
+                                                3 => "badge bg-danger",
+                                                _ => "badge bg-secondary"
+                                            };
+                                        }
+                                        <span class="@priorityClass">@priorityText</span>
+                                    </dd>
+
+                                    <dt class="col-sm-5 text-muted">Ghim</dt>
+                                    <dd class="col-sm-7">
+                                        @if (Model.IsPinned)
+                                        {
+                                            <i class="fas fa-thumbtack text-primary" data-bs-toggle="tooltip" title="Đã ghim"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-thumbtack text-muted" data-bs-toggle="tooltip" title="Chưa ghim"></i>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 bg-light">
+                                <h5 class="border-bottom pb-2 fw-bold text-secondary">Thời gian</h5>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5 text-muted">Bắt đầu</dt>
+                                    <dd class="col-sm-7">
+                                        <i class="far fa-calendar-alt me-1 text-primary"></i>
+                                        @Model.StartDate.ToString("dd/MM/yyyy")
+                                    </dd>
+
+                                    <dt class="col-sm-5 text-muted">Kết thúc</dt>
+                                    <dd class="col-sm-7">
+                                        <i class="far fa-calendar-check me-1 text-primary"></i>
+                                        @Model.EndDate.ToString("dd/MM/yyyy")
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-3 bg-light">
+                                <h5 class="border-bottom pb-2 fw-bold text-secondary">Người thực hiện</h5>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-3 text-muted">Người giao việc</dt>
+                                    <dd class="col-sm-9">
+                                        <i class="fas fa-user-tie me-1 text-primary"></i>
+                                        @Model.AssignerName
+                                    </dd>
+
+                                    <dt class="col-sm-3 text-muted">Phòng ban nhận</dt>
+                                    <dd class="col-sm-9">
+                                        @foreach (var dept in Model.DepartmentList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                                        {
+                                            <span class="badge bg-light text-dark border me-1 mb-1">
+                                                <i class="fas fa-building me-1 text-primary"></i>
+                                                @dept
+                                            </span>
+                                        }
+                                    </dd>
+
+                                    <dt class="col-sm-3 text-muted">Người nhận</dt>
+                                    <dd class="col-sm-9">
+                                        @foreach (var user in Model.UserList?.Split(',', StringSplitOptions.TrimEntries) ?? Enumerable.Empty<string>())
+                                        {
+                                            <span class="badge bg-light text-dark border me-1 mb-1">
+                                                <i class="fas fa-user me-1 text-primary"></i>
+                                                @user
+                                            </span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="mt-2">
-                @(Html.DevExtreme().Button()
-                    .ID("btnAddNote")
-                    .Text("Thêm ghi chú")
-                    .Type(ButtonType.Success)
-                    .OnClick("addNote"))
+        <!-- Cột phải: Ghi chú -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h4 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-sticky-note me-2 text-primary"></i>
+                        Ghi chú
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="bg-light p-3 rounded-3 mb-3">
+                        @(Html.DevExtreme().List()
+                            .ID("noteList")
+                            .DataSource(Model.Notes
+                            .OrderByDescending(n => n.CreatedDate)
+                            .Select(note => new
+                            {
+                                ID = note.NoteID,
+                                Text = $"{note.CreatedDate:dd/MM/yyyy HH:mm}: {note.Content}"
+                            }))
+                            .DisplayExpr("Text")
+                            .KeyExpr("ID")
+                            .SelectionMode(ListSelectionMode.None)
+                            .ShowScrollbar(ShowScrollbarMode.Always)
+                            .Height(250)
+                            )
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="form-floating mb-3">
+                            @(Html.DevExtreme().TextArea()
+                                .ID("noteContent")
+                                .Height(120)
+                                .Placeholder("Thêm ghi chú mới..."))
+                        </div>
+
+                        <div class="d-grid">
+                            @(Html.DevExtreme().Button()
+                                .ID("btnAddNote")
+                                .Text("Thêm ghi chú")
+                                .Icon("fas fa-plus")
+                                .Type(ButtonType.Success)
+                                .Width("100%")
+                                .OnClick("addNote"))
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -129,6 +206,12 @@
 
 @section Scripts {
     <script>
+        // Khởi tạo tooltips của Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
         function addNote() {
             const $textArea = $("#noteContent").dxTextArea("instance");
             const content = $textArea.option("value")?.trim();

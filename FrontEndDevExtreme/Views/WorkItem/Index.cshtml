@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
 <link href="~/css/index.css" rel="stylesheet" />
-
+<link href="~/css/note.css" rel="stylesheet" />
 
 <div class="container-fluid px-4 animate-in">
     <!-- Page Header -->
@@ -45,7 +45,6 @@
                                     .ShowClearButton(true)
                                     .StylingMode(EditorStylingMode.Filled))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Người thực hiện</label>
                                 @(Html.DevExtreme().SelectBox()
@@ -58,7 +57,6 @@
                                     .StylingMode(EditorStylingMode.Filled)
                                     .Value(currentQuery["UserName"].ToString()))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Người giao</label>
                                 @(Html.DevExtreme().SelectBox()
@@ -91,7 +89,6 @@
                                     .StylingMode(EditorStylingMode.Filled)
                                     .Value(currentQuery["Status"].ToString()))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Độ ưu tiên</label>
                                 @(Html.DevExtreme().SelectBox()
@@ -108,7 +105,6 @@
                                     .StylingMode(EditorStylingMode.Filled)
                                     .Value(currentQuery["Priority"].ToString()))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Đã ghim</label>
                                 @(Html.DevExtreme().SelectBox()
@@ -138,7 +134,6 @@
                                     .DisplayFormat("dd/MM/yyyy")
                                     .Value(currentQuery["StartDateFrom"].ToString()))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Đến ngày</label>
                                 @(Html.DevExtreme().DateBox()
@@ -149,7 +144,6 @@
                                     .DisplayFormat("dd/MM/yyyy")
                                     .Value(currentQuery["EndDateTo"].ToString()))
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label">Phòng ban</label>
                                 @(Html.DevExtreme().SelectBox()
@@ -165,16 +159,58 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search me-1"></i> Tìm kiếm
-                        </button>
+                    @* Phân trang *@
+                    @{
+                        var pageSize = ViewBag.PageSize != null ? (int)ViewBag.PageSize : 50;
+                        var pageNumber = ViewBag.PageNumber != null ? (int)ViewBag.PageNumber : 1;
+                        var totalItems = ViewBag.TotalCount != null ? (int)ViewBag.TotalCount : 0;
+                        var totalPages = ViewBag.TotalPages != null ? (int)ViewBag.TotalPages : 1;
+                    }
+
+                    <div class="row g-3 mt-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Số công việc / trang</label>
+                            @(Html.DevExtreme().NumberBox()
+                                .Name("pageSize")
+                                .Min(1)
+                                .Value(pageSize)
+                                .ShowSpinButtons(true)
+                                .StylingMode(EditorStylingMode.Filled))
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Trang số</label>
+                            @(Html.DevExtreme().SelectBox()
+                                .Name("pageNumber")
+                                .DataSource(Enumerable.Range(1, totalPages))
+                                .Value(pageNumber)
+                                .StylingMode(EditorStylingMode.Filled)
+                                .Placeholder("Chọn trang"))
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-2"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">Tổng số công việc:</span>
+                                <span class="fw-bold ms-1">@totalItems</span>
+                            </div>
+                            <div>
+                                <span class="text-muted">Tổng số trang:</span>
+                                <span class="fw-bold ms-1">@totalPages</span>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+
 
     <!-- Grid Card -->
     <div class="card animate-in" style="animation-delay: 0.2s">
@@ -196,11 +232,11 @@
                         .ColumnAutoWidth(true)
                         .ColumnMinWidth(100)
                         .HoverStateEnabled(true)
-                        .Paging(p => p.PageSize(5))
+                        .Paging(p => p.PageSize(50))
                         .Pager(p =>
                         {
                             p.ShowPageSizeSelector(true)
-                        .AllowedPageSizes(new[] { 5, 10, 20, 50 })
+                        .AllowedPageSizes(new[] {  10, 20, 50, 100, 200, 500 })
                         .ShowInfo(true)
                         .ShowNavigationButtons(true);
                         })
