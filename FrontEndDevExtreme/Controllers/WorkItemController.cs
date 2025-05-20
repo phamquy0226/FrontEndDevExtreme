@@ -22,7 +22,7 @@ namespace FrontEndDevExtreme.Controllers
         }
 
 
-        public async Task<IActionResult> Index([FromQuery] WorkItemFilterModel filter, int pageNumber = 1, int pageSize = 50)
+        public async Task<IActionResult> Index([FromQuery] WorkItemFilterModel filter, int pageNumber = 1, int pageSize = 100)
         {
             var response = await _workItemApiService.GetFilteredAsync(filter, pageNumber, pageSize);
 
@@ -52,7 +52,7 @@ namespace FrontEndDevExtreme.Controllers
             ViewBag.PageNumber = pageNumber;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalCount = response.TotalCount;
-
+            ViewBag.TotalPages = (int)Math.Ceiling((double)response.TotalCount / pageSize);
             return View(workItems);
         }
 

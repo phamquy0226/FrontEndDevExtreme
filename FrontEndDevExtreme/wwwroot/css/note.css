@@ -1,0 +1,38 @@
+﻿
+.note-list-custom {
+    border: 1px solid rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+}
+
+.note-list-custom:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+}
+
+.note-textarea {
+    box-shadow: 0 2px 5px rgba(0,0,0,.05) inset;
+    transition: all 0.3s ease;
+}
+
+    .note-textarea:focus {
+        box-shadow: 0 4px 8px rgba(0,0,0,.1) inset;
+    }
+
+/* Tùy chỉnh animation cho nút */
+#btnAddNotePop {
+    transition: transform 0.2s ease;
+}
+
+    #btnAddNotePop:hover {
+        transform: translateY(-2px);
+    }
+
+/* Tùy chỉnh scrollbar DevExtreme list */
+.dx-scrollable-customizable-scrollbars .dx-scrollbar-vertical {
+    width: 8px;
+}
+
+    .dx-scrollable-customizable-scrollbars .dx-scrollbar-vertical .dx-scrollable-scroll {
+        background-color: rgba(0,0,0,.2);
+        border-radius: 4px;
+    }
+
