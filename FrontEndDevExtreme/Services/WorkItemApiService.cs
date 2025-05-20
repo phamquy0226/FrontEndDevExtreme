@@ -44,7 +44,7 @@ namespace FrontEndDevExtreme.Services
             }
         }
 
-        public async Task<List<WorkItemViewModel>> GetFilteredAsync(WorkItemFilterModel filter)
+        public async Task<ResponseModel<List<WorkItemViewModel>>> GetFilteredAsync(WorkItemFilterModel filter, int pageNumber, int pageSize)
         {
             var queryParams = new List<string>();
 
@@ -60,16 +60,32 @@ namespace FrontEndDevExtreme.Services
             if (filter.Priority.HasValue) queryParams.Add($"priority={filter.Priority}");
             if (filter.IsPinned.HasValue) queryParams.Add($"isPinned={filter.IsPinned}");
 
+            queryParams.Add($"pageNumber={pageNumber}");
+            queryParams.Add($"pageSize={pageSize}");
+
             var queryString = string.Join("&", queryParams);
             var response = await _httpClient.GetAsync($"/api/WorkItem?{queryString}");
 
             if (!response.IsSuccessStatusCode)
-                return new List<WorkItemViewModel>();
+                return new ResponseModel<List<WorkItemViewModel>>()
+                {
+                    Success = false,
+                    Data = new List<WorkItemViewModel>(),
+                    Message = "Failed to get data"
+                };
 
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<ResponseModel<List<WorkItemViewModel>>>(content);
-            return result?.Data ?? new List<WorkItemViewModel>();
+            return result ?? new ResponseModel<List<WorkItemViewModel>>()
+            {
+                Success = false,
+                Data = new List<WorkItemViewModel>(),
+                Message = "Empty response"
+            };
         }
+
+
+
 
 
         public async Task<bool> CreateAsync(WorkItemCreateModel model)
@@ -183,13 +199,5 @@ namespace FrontEndDevExtreme.Services
         }
 
 
-    }
-
-    public class ResponseModel<T>
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public T Data { get; set; }
-        public int? ErrorCode { get; set; }
     }
 }

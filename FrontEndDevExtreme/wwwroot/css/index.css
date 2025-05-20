@@ -1,0 +1,136 @@
+﻿
+.card {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+}
+
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-success {
+    background-color: #28a745;
+}
+
+    .btn-success:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+    }
+
+.page-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem 0;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+}
+
+.form-control, .dx-texteditor-input {
+    border-radius: 0.5rem;
+    padding: 0.625rem 1rem;
+}
+
+.dx-widget.dx-button {
+    border-radius: 0.5rem;
+}
+
+#workItemGrid {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.status-badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+.filter-container {
+    background-color: #f8f9fa;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.action-button {
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.25rem;
+}
+
+.task-name {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+    .task-name.completed {
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+
+.progress {
+    height: 12px;
+    border-radius: 20px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 20px;
+}
+
+.create-button {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.floating-action-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1030;
+    transition: all 0.3s;
+}
+
+    .floating-action-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+    }
+
+.animate-in {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

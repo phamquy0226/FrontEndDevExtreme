@@ -22,21 +22,41 @@ namespace FrontEndDevExtreme.Controllers
         }
 
 
-        public async Task<IActionResult> Index([FromQuery] WorkItemFilterModel filter)
+        public async Task<IActionResult> Index([FromQuery] WorkItemFilterModel filter, int pageNumber = 1, int pageSize = 50)
         {
-            var workItems = await _workItemApiService.GetFilteredAsync(filter);
+            var response = await _workItemApiService.GetFilteredAsync(filter, pageNumber, pageSize);
+
+            if (!response.Success)
+            {
+                // Xử lý lỗi, ví dụ:
+                ModelState.AddModelError("", response.Message);
+                return View(new List<WorkItemViewModel>());
+            }
+
+            var workItems = response.Data ?? new List<WorkItemViewModel>();
+
             var assigned = await _userApiService.GetAllAsync();
             var assigner = await _userApiService.GetAllAsync();
-            var departments = await _departmentApiService.GetAllAsync(); 
+            var departments = await _departmentApiService.GetAllAsync();
+
             ViewBag.Assigned = assigned;
             ViewBag.Assigner = assigner;
             ViewBag.Departments = departments;
-            foreach (var workItem in workItems) {
+
+            foreach (var workItem in workItems)
+            {
                 workItem.Notes = await _noteApiService.GetNotesByWorkItemIdAsync(workItem.WorkItemID);
                 workItem.NoteCount = workItem.Notes.Count();
             }
+
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = response.TotalCount;
+
             return View(workItems);
         }
+
+
 
 
         public async Task<IActionResult> Create()

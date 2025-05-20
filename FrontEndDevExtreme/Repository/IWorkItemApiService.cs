@@ -7,7 +7,8 @@ namespace FrontEndDevExtreme.Repository
         Task<List<WorkItemViewModel>> GetAllAsync();
         Task<bool> CreateAsync(WorkItemCreateModel model);
         Task<WorkItemDetailModel> GetWorkItemDetailAsync(int id);
-        Task<List<WorkItemViewModel>> GetFilteredAsync(WorkItemFilterModel filter);
+        Task<ResponseModel<List<WorkItemViewModel>>> GetFilteredAsync(WorkItemFilterModel filter, int pageNumber, int pageSize);
+
         Task<bool> UpdateAsync(int id, WorkItemEditModel model);
         Task<bool> DeleteAsync(int id);
     }
