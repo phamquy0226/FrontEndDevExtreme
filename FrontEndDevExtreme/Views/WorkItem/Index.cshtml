@@ -24,15 +24,17 @@
 
     <!-- Filter Card -->
     <div class="card animate-in" style="animation-delay: 0.1s">
-        <button class="btn btn-sm btn-outline-secondary"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#filterCollapse"
-                aria-expanded="true"
-                aria-controls="filterCollapse">
-            <i class="bi bi-chevron-up" id="filterToggleIcon"></i>
-        </button>
-
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-funnel me-2"></i> Bộ lọc tìm kiếm
+                </h5>
+                <button class="btn btn-secondary mb-3 d-flex align-items-center justify-content-center px-3 py-2" type="button" id="btnToggleFilter" aria-label="Toggle filter">
+                    <i class="bi bi-funnel-fill" id="filterIcon"></i>
+                    <i class="bi bi-chevron-down ms-2" id="arrowIcon"></i>
+                </button>
+            </div>
+        </div>
         <div id="filterCollapse" class="collapse show">
             <div class="card-body">
                 <form id="Filter" method="get">
@@ -221,36 +223,19 @@
 </div>
 
 @section Scripts {
+
+
     <script>
-        $(function () {
-                    var collapseElement = document.getElementById('filterCollapse');
-        var bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseElement); // tạo instance hoặc lấy instance đã có
+        $(document).ready(function () {
 
-        // Mỗi khi click nút, toggle collapse và đổi icon
-        document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
-            bsCollapse.toggle();
-
-            var icon = document.getElementById('filterToggleIcon');
-            var isShown = collapseElement.classList.contains('show');
-            // Vì toggle chạy async, ta check class theo thời điểm sau khi toggle (dùng setTimeout 1ms)
-            setTimeout(() => {
-                if (collapseElement.classList.contains('show')) {
-                    icon.classList.remove('bi-chevron-down');
-                    icon.classList.add('bi-chevron-up');
-                } else {
-                    icon.classList.remove('bi-chevron-up');
-                    icon.classList.add('bi-chevron-down');
-                }
-            }, 1);
-        });
-
-
-            // Submit bộ lọc
+            // Submit form tìm kiếm
             $('#Filter').on('submit', function (e) {
-                e.preventDefault();
-                var $form = $(this);
-                var query = $form.serialize();
+                e.preventDefault(); // Ngăn hành vi submit mặc định
 
+                var $form = $(this);
+                var query = $form.serialize(); // Lấy dữ liệu từ form filter
+
+                // Hiển thị loading hoặc làm mờ DataGrid
                 $('#gridContainer').addClass('opacity-50 pointer-events-none');
 
                 $.ajax({
@@ -258,18 +243,45 @@
                     data: query,
                     type: 'GET',
                     success: function (result) {
-                        $('#gridContainer').html(result);
+                        $('#gridContainer').html(result); // Cập nhật nội dung mới
                     },
                     error: function (xhr) {
                         console.error("Lỗi: ", xhr.responseText);
-                        alert("Đã xảy ra lỗi khi tải dữ liệu.");
+                        alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
                     },
                     complete: function () {
+                        // Bỏ loading
                         $('#gridContainer').removeClass('opacity-50 pointer-events-none');
                     }
                 });
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterCollapse = document.getElementById('filterCollapse');
+            const btnToggle = document.getElementById('btnToggleFilter');
+            const arrowIcon = document.getElementById('arrowIcon');
 
+            // Initialize Bootstrap 5 collapse
+            const bsCollapse = new bootstrap.Collapse(filterCollapse, { toggle: false });
+
+            // Toggle collapse on button click
+            btnToggle.addEventListener('click', function () {
+                bsCollapse.toggle();
+            });
+
+            // Change arrow direction when collapse is shown
+            filterCollapse.addEventListener('show.bs.collapse', function () {
+                arrowIcon.classList.remove('bi-chevron-down');
+                arrowIcon.classList.add('bi-chevron-up');
+            });
+
+            // Change arrow direction when collapse is hidden
+            filterCollapse.addEventListener('hide.bs.collapse', function () {
+                arrowIcon.classList.remove('bi-chevron-up');
+                arrowIcon.classList.add('bi-chevron-down');
+            });
         });
     </script>
 }
