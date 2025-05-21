@@ -241,6 +241,3 @@
 
         initWorkItemCreate();
     });
-function closeWorkItemPopup() {
-    $("#popup").dxPopup("hide");
-}
