@@ -1,4 +1,5 @@
-﻿$(function () {
+﻿
+$(function () {
     // Initialize Bootstrap tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -132,6 +133,7 @@
         },
         onHidden: function () {
             popupNote._workItemId = undefined;
+            window.currentWorkItemId = undefined;
             $("#popupNoteContent").empty();
         }
     }).dxPopup("instance");
@@ -141,17 +143,18 @@
         e.preventDefault();
         const workItemId = $(this).data("id");
         popupNote._workItemId = workItemId;
-        popupNote.show();
+        window.currentWorkItemId = workItemId;
+        popupNote.show(workItemId);
     });
 
-    // Expand/Collapse buttons
-    $("#btnExpandAll").on("click", function () {
-        $(".task-card").addClass("expanded");
-    });
+    //// Expand/Collapse buttons
+    //$("#btnExpandAll").on("click", function () {
+    //    $(".task-card").addClass("expanded");
+    //});
 
-    $("#btnCollapseAll").on("click", function () {
-        $(".task-card").removeClass("expanded");
-    });
+    //$("#btnCollapseAll").on("click", function () {
+    //    $(".task-card").removeClass("expanded");
+    //});
 
     // Responsive layout changes
     $(window).on('resize', function () {
@@ -190,3 +193,4 @@
         );
     }
 });
+

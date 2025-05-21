@@ -9,6 +9,7 @@
 <link href="~/css/index.css" rel="stylesheet" />
 <link href="~/css/note.css" rel="stylesheet" />
 
+
 <div class="container-fluid px-4 animate-in">
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -23,13 +24,15 @@
 
     <!-- Filter Card -->
     <div class="card animate-in" style="animation-delay: 0.1s">
-        <div class="card-header bg-light">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0">
-                    <i class="bi bi-funnel me-2"></i> Bộ lọc tìm kiếm
-                </h5>
-            </div>
-        </div>
+        <button class="btn btn-sm btn-outline-secondary"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#filterCollapse"
+                aria-expanded="true"
+                aria-controls="filterCollapse">
+            <i class="bi bi-chevron-up" id="filterToggleIcon"></i>
+        </button>
+
         <div id="filterCollapse" class="collapse show">
             <div class="card-body">
                 <form id="Filter" method="get">
@@ -212,274 +215,61 @@
 
 
 
-    <!-- Grid Card -->
-    <div class="card animate-in" style="animation-delay: 0.2s">
-        <div class="card-header bg-light">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0">
-                    <i class="bi bi-list-task me-2"></i> Danh sách công việc
-                </h5>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div id="gridContainer">
-                @(Html.DevExtreme().DataGrid<FrontEndDevExtreme.Models.WorkItemViewModel>()
-                        .ID("workItemGrid")
-                        .DataSource(Model)
-                        .ShowBorders(true)
-                        .RowAlternationEnabled(true)
-                        .WordWrapEnabled(true)
-                        .ColumnAutoWidth(true)
-                        .ColumnMinWidth(100)
-                        .HoverStateEnabled(true)
-                        .Paging(p => p.PageSize(50))
-                        .Pager(p =>
-                        {
-                            p.ShowPageSizeSelector(true)
-                        .AllowedPageSizes(new[] {  10, 20, 50, 100, 200, 500 })
-                        .ShowInfo(true)
-                        .ShowNavigationButtons(true);
-                        })
-                        .LoadPanel(p => p
-                        .Enabled(true)
-                        .Text("Đang tải dữ liệu...")
-                        .ShowIndicator(true)
-                        .ShowPane(true)
-                        )
-                        .Columns(columns =>
-                        {
-                            columns.Add()
-                        .Caption("")
-                        .Width(120)
-                        .AllowFiltering(false)
-                        .AllowSorting(false)
-                        .CellTemplate(@<text>
-                    <div class="d-flex justify-content-start">
-                        <div class="btn-group">
-                     
-
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-warning action-button"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Chỉnh sửa"
-                                    onclick="location.href='@Url.Action("Edit", "WorkItem", new { id = "__id__" })'.replace('__id__', '<%= data.WorkItemID %>')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-
-                            <% if (data.Status !== 2) { %>
-                            <form action="@Url.Action("MarkAsCompleted", "WorkItem")" method="post"
-                                  style="display:inline;" onsubmit="return confirm('Xác nhận đánh dấu hoàn tất?');">
-                                <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                                <button type="submit"
-                                        class="btn btn-sm btn-outline-success action-button"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Hoàn tất">
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            </form>
-                            <% } %>
-
-                            <form action="@Url.Action("Delete", "WorkItem")" method="post"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');" style="display:inline;">
-                                <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                                <button type="submit"
-                                        class="btn btn-sm btn-outline-danger action-button"
-                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Xóa">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </text>);
-
-                            columns.Add()
-                        .Caption("Thông tin công việc")
-                        .MinWidth(300)
-                        .CellTemplate(@<text>
-                    <div class="task-card">
-                        <div class="mb-2">
-                            <div class="d-flex align-items-center">
-                                <% if (data.IsPinned === true) { %>
-                                <span class="me-2" title="Đã ghim"><i class="bi bi-pin-angle-fill text-danger"></i></span>
-                                <% } %>
-                                <a href="/WorkItem/Detail/<%= data.WorkItemID %>"
-                                   class="task-name <%= data.Status === 2 ? 'completed' : '' %>">
-                                    <%= data.TaskName %>
-                                </a>
-
-                            </div>
-                        </div>
-
-                        <div class="mb-2">
-                            <div class="d-flex flex-wrap gap-1">
-                                <% if (data.Priority === 1) { %>
-                                <span class="badge bg-success rounded-pill">Thấp</span>
-                                <% } else if (data.Priority === 2) { %>
-                                <span class="badge bg-warning text-dark rounded-pill">Trung bình</span>
-                                <% } else if (data.Priority === 3) { %>
-                                <span class="badge bg-danger rounded-pill">Cao</span>
-                                <% } %>
-
-                                <% if (data.Status === 0) { %>
-                                <span class="badge bg-secondary rounded-pill">Chưa thực hiện</span>
-                                <% } else if (data.Status === 1) { %>
-                                <span class="badge bg-info text-dark rounded-pill">Đang thực hiện</span>
-                                <% } else if (data.Status === 2) { %>
-                                <span class="badge bg-success rounded-pill">Đã xong</span>
-                                <% } %>
-
-                                <% if (data.TaskType) { %>
-                                <span class="badge bg-dark text-white rounded-pill"><%= data.TaskType %></span>
-                                <% } %>
-                            </div>
-                        </div>
-
-                        <% if (data.EndDate) {
-                        var end = new Date(data.EndDate);
-                        var now = new Date();
-                        var diffMs = end - now;
-                        var absMs = Math.abs(diffMs);
-
-                        var days = Math.floor(absMs / (1000 * 60 * 60 * 24));
-                        var hours = Math.floor((absMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        var minutes = Math.floor((absMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                        if (diffMs >= 0) { %>
-                        <div class="d-flex align-items-center text-primary">
-                            <i class="bi bi-clock me-1"></i>
-                            <small><strong>Còn lại: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong></small>
-                        </div>
-                        <% } else { %>
-                        <div class="d-flex align-items-center text-danger">
-                            <i class="bi bi-exclamation-circle me-1"></i>
-                            <small><strong>Đã trễ: <%= days %> ngày <%= hours %> giờ <%= minutes %> phút</strong></small>
-                        </div>
-                        <% }
-                        } %>
-                    </div>
-                </text>);
-
-                            columns.Add()
-                        .Caption("Thời gian & Tiến độ")
-                        .CellTemplate(@<text>
-                    <div>
-                        <% if (data.StartDate || data.EndDate) { %>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-calendar-event me-2 text-muted"></i>
-                            <div>
-                                <strong>
-                                    <%= data.StartDate ? new Date(data.StartDate).toLocaleDateString('vi-VN') : '' %>
-                                    <i class="bi bi-arrow-right mx-1"></i>
-                                    <%= data.EndDate ? new Date(data.EndDate).toLocaleDateString('vi-VN') : '' %>
-                                </strong>
-                            </div>
-                        </div>
-                        <% } %>
-
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-graph-up me-2 text-muted"></i>
-                            <div class="flex-grow-1">
-                                <div class="progress">
-                                    <div class="progress-bar <%= data.Progress < 50 ? 'bg-warning' : 'bg-success' %>" role="progressbar"
-                                         style="width: <%= data.Progress %>%;"
-                                         aria-valuenow="<%= data.Progress %>" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                                <div class="text-end mt-1">
-                                    <small class="text-muted"><%= data.Progress %>%</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <% if (data.DateCreate) { %>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-clock-history me-2 text-muted"></i>
-                            <small class="text-muted">
-                                Tạo lúc: <%= new Date(data.DateCreate).toLocaleString('vi-VN') %>
-                            </small>
-                        </div>
-                        <% } %>
-                    </div>
-                </text>);
-
-                            columns.Add()
-                        .Caption("Người giao")
-                        .CellTemplate(@<text>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-check me-2 text-muted"></i>
-                        <strong><%= data.AssignerName %></strong>
-                    </div>
-                </text>);
-
-                            columns.Add()
-                        .Caption("Người nhận")
-                        .CellTemplate(@<text>
-                    <% if (data.UserList) { %>
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-people me-2 text-muted"></i>
-                        <div>
-                            <% data.UserList.split(',').forEach(function(user) { %>
-                            <div class="mb-1">
-                                <span class="badge bg-light text-dark">
-                                    <i class="bi bi-person me-1"></i>
-                                    <%= user.trim() %>
-                                </span>
-                            </div>
-                            <% }); %>
-                        </div>
-                    </div>
-                    <% } %>
-                </text>);
-
-
-                            columns.Add()
-                        .Caption("Phòng ban")
-                        .CellTemplate(@<text>
-                    <% if (data.DepartmentList) { %>
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-building me-2 text-muted"></i>
-                        <div>
-                            <% data.DepartmentList.split(',').forEach(function(dept) { %>
-                            <div class="mb-1">
-                                <span class="badge bg-secondary">
-                                    <%= dept.trim() %>
-                                </span>
-                            </div>
-                            <% }); %>
-                        </div>
-                    </div>
-                    <% } %>
-                </text>);
-
-                            columns.Add()
-                        .Caption("Ghi chú")
-                        .Width(120)
-                        .CellTemplate(@<text>
-                    <button type="button" class="btn btn-sm btn-outline-info w-100 btn-open-note" data-id="<%= data.WorkItemID %>">
-                        <i class="bi bi-chat-left-text me-1"></i>
-                        <span class="badge bg-secondary"><%= data.NoteCount %></span>
-                    </button>
-                </text>);
-                        }))
-            </div>
-        </div>
+    <div id="gridContainer">
+        @Html.Partial("_WorkItemGridPartial", Model)
     </div>
 </div>
 
-<!-- Floating action button for mobile -->
-<button type="button" id="mobileCreateBtn" class="floating-action-button btn btn-success d-md-none">
-    <i class="bi bi-plus fs-4"></i>
-</button>
+@section Scripts {
+    <script>
+        $(function () {
+                    var collapseElement = document.getElementById('filterCollapse');
+        var bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseElement); // tạo instance hoặc lấy instance đã có
 
-<!-- Popups -->
-<div id="popupCreateWorkItem"></div>
-<div id="popupNote"></div>
-<script src="~/js/create-workitem.js"></script>
-<script>
-    var appUrls = {
-        createPopUp: '@Url.Action("CreatePopUp", "WorkItem")',
-        notePartial: '@Url.Action("NotePartial", "WorkItem")',
-        addNote: '@Url.Action("AddNote", "WorkItem")'
-    };
-</script>
-<script src="/js/index.js"></script>
-<script src="~/js/index.js"></script>
-<script src="~/js/note.js"></script>
+        // Mỗi khi click nút, toggle collapse và đổi icon
+        document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
+            bsCollapse.toggle();
+
+            var icon = document.getElementById('filterToggleIcon');
+            var isShown = collapseElement.classList.contains('show');
+            // Vì toggle chạy async, ta check class theo thời điểm sau khi toggle (dùng setTimeout 1ms)
+            setTimeout(() => {
+                if (collapseElement.classList.contains('show')) {
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-up');
+                } else {
+                    icon.classList.remove('bi-chevron-up');
+                    icon.classList.add('bi-chevron-down');
+                }
+            }, 1);
+        });
+
+
+            // Submit bộ lọc
+            $('#Filter').on('submit', function (e) {
+                e.preventDefault();
+                var $form = $(this);
+                var query = $form.serialize();
+
+                $('#gridContainer').addClass('opacity-50 pointer-events-none');
+
+                $.ajax({
+                    url: '@Url.Action("GetFilteredGrid", "WorkItem")',
+                    data: query,
+                    type: 'GET',
+                    success: function (result) {
+                        $('#gridContainer').html(result);
+                    },
+                    error: function (xhr) {
+                        console.error("Lỗi: ", xhr.responseText);
+                        alert("Đã xảy ra lỗi khi tải dữ liệu.");
+                    },
+                    complete: function () {
+                        $('#gridContainer').removeClass('opacity-50 pointer-events-none');
+                    }
+                });
+            });
+
+        });
+    </script>
+}
