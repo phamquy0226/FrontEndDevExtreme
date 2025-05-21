@@ -43,7 +43,7 @@ public class NoteApiService : INoteApiService
 
         var response = await _httpClient.PostAsync($"/api/workitems/{workItemId}/notes", httpContent);
 
-        return response.IsSuccessStatusCode;  
+        return response.IsSuccessStatusCode;
     }
 
 

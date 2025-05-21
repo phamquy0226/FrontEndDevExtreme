@@ -21,7 +21,7 @@ namespace FrontEndDevExtreme.Controllers
             _noteApiService = noteApiService;
         }
 
-
+        
         public async Task<IActionResult> Index([FromQuery] WorkItemFilterModel filter, int pageNumber = 1, int pageSize = 100)
         {
             var response = await _workItemApiService.GetFilteredAsync(filter, pageNumber, pageSize);
@@ -56,6 +56,24 @@ namespace FrontEndDevExtreme.Controllers
             return View(workItems);
         }
 
+        public async Task<PartialViewResult> GetFilteredGrid([FromQuery] WorkItemFilterModel filter, int pageNumber = 1, int pageSize = 100)
+        {
+            var response = await _workItemApiService.GetFilteredAsync(filter, pageNumber, pageSize);
+            var workItems = response.Data ?? new List<WorkItemViewModel>();
+
+            foreach (var workItem in workItems)
+            {
+                workItem.Notes = await _noteApiService.GetNotesByWorkItemIdAsync(workItem.WorkItemID);
+                workItem.NoteCount = workItem.Notes.Count();
+            }
+
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = response.TotalCount;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)response.TotalCount / pageSize);
+
+            return PartialView("_WorkItemGridPartial", workItems);
+        }
 
 
 

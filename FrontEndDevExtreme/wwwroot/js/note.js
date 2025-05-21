@@ -9,8 +9,8 @@ function refreshNoteList() {
     const container = $("#popupNoteContent");
     container.html("<div class='text-muted'>Đang tải...</div>");
 
-    if (popupNote._workItemId) {
-        $.get(notePartialUrl, { workItemId: popupNote._workItemId }, function (html) {
+    if (window.currentWorkItemId) {
+        $.get(appUrls.notePartial, { workItemId: window.currentWorkItemId }, function (html) {
             container.html(html);
             initNotePopup(); // Phải gọi lại sau khi load partial
         }).fail(function () {
@@ -24,7 +24,7 @@ function refreshNoteList() {
 function addNotePop() {
     const $textArea = $("#noteContentPop").dxTextArea("instance");
     const content = $textArea.option("value")?.trim();
-
+    console.log("workItemId:", window.currentWorkItemId);
     if (!content) {
         DevExpress.ui.notify("Vui lòng nhập nội dung ghi chú", "warning", 2000);
         return;
@@ -33,10 +33,10 @@ function addNotePop() {
     $textArea.option("disabled", true);
 
     $.ajax({
-        url: addNoteUrl,
+        url: appUrls.addNote,
         method: "POST",
         data: {
-            workItemId: popupNote._workItemId,
+            workItemId: window.currentWorkItemId,
             content: content
         },
         success: function (res) {
