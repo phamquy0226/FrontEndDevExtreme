@@ -68,26 +68,22 @@
                         </button>
 
                         <% if (data.Status !== 2) { %>
-                        <form action="@Url.Action("MarkAsCompleted", "WorkItem")" method="post"
-                              style="display:inline;" onsubmit="return confirm('Xác nhận đánh dấu hoàn tất?');">
-                            <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                            <button type="submit"
-                                    class="btn btn-sm btn-outline-success action-button"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Hoàn tất">
-                                <i class="bi bi-check-circle"></i>
-                            </button>
-                        </form>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-success action-button"
+                                data-id="<%= data.WorkItemID %>"
+                                onclick="markAsCompleted(this)"
+                                title="Hoàn tất">
+                            <i class="bi bi-check-circle"></i>
+                        </button>
                         <% } %>
 
-                        <form action="@Url.Action("Delete", "WorkItem")" method="post"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');" style="display:inline;">
-                            <input type="hidden" name="id" value="<%= data.WorkItemID %>" />
-                            <button type="submit"
-                                    class="btn btn-sm btn-outline-danger action-button"
-                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Xóa">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger action-button"
+                                data-id="<%= data.WorkItemID %>"
+                                onclick="deleteWorkItem(this)"
+                                title="Xóa">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                 </div>
             </text>);
@@ -287,11 +283,13 @@
 <script src="~/js/index.js"></script>
 <script src="~/js/note.js"></script>
 <script>
-    function onGridContentReady(e) {
-        // Lấy phần chứa dữ liệu để scroll
-        const rowsView = e.element.find(".dx-datagrid-rowsview")[0];
-        enableDragScroll(rowsView);
+        function onGridContentReady(e) {
+        const scrollableContainer = e.element.find(".dx-scrollable-container")[0];
+        if (scrollableContainer) {
+            enableDragScroll(scrollableContainer);
+        }
     }
+
 
     function enableDragScroll(container) {
         let isDragging = false;

@@ -196,3 +196,28 @@ $(function () {
         );
     }
 });
+function deleteWorkItem(button) {
+    const id = $(button).data("id");
+    if (!confirm("Bạn có chắc chắn muốn xóa công việc này?")) return;
+
+    $.post('/WorkItem/Delete', { id: id }, function (res) {
+        DevExpress.ui.notify(res.message, res.success ? "success" : "error", 3000);
+
+        if (res.success) {
+            $('#Filter').submit();
+        }
+    });
+}
+
+function markAsCompleted(button) {
+    const id = $(button).data("id");
+    if (!confirm("Xác nhận đánh dấu hoàn tất?")) return;
+
+    $.post('/WorkItem/MarkAsCompleted', { id: id }, function (res) {
+        DevExpress.ui.notify(res.message, res.success ? "success" : "error", 3000);
+
+        if (res.success) {
+            $('#Filter').submit();
+        }
+    });
+}

@@ -330,8 +330,7 @@ namespace FrontEndDevExtreme.Controllers
             var success = await _workItemApiService.DeleteAsync(id);
             if (success)
             {
-                TempData["Success"] = "Xóa thành công";
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Xóa thành công" });
             }
 
             TempData["Error"] = "Xóa thất bại";
@@ -373,7 +372,7 @@ namespace FrontEndDevExtreme.Controllers
             var result = await _workItemApiService.UpdateAsync(id, model);
             if (result)
             {
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Đã hoàn tất công việc." });
             }
 
             return Json(new { success = false, message = "Cập nhật thất bại." });
