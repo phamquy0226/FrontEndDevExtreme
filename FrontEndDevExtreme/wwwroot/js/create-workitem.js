@@ -175,14 +175,7 @@
                 url: url,
                 data: data,
                 success: function (response) {
-                    Toastify({
-                        text: "Tạo công việc thành công!",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#28a745",
-                        close: true
-                    }).showToast();
+                    DevExpress.ui.notify("Tạo công việc thành công!", "success", 3000);
 
                     const popup = $("#popupCreateWorkItem").dxPopup("instance");
                     popup.hide();
@@ -190,14 +183,7 @@
                     $('#Filter').submit();
                 },
                 error: function (xhr) {
-                    Toastify({
-                        text: "Lỗi khi tạo công việc!",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#dc3545",
-                        close: true
-                    }).showToast();
+                    DevExpress.ui.notify("Lỗi khi tạo công việc!", "error", 3000);
                 }
             });
         });
