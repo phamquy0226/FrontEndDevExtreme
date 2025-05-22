@@ -53,7 +53,9 @@ $(function () {
             }).fail(function () {
                 contentElement.html('<div class="alert alert-danger">Không thể tải form tạo công việc. Vui lòng thử lại.</div>');
             });
-        }
+
+        },
+        
     }).dxPopup("instance");
 
     $("#btnOpenCreatePopup, #mobileCreateBtn").on("click", function (e) {
@@ -135,6 +137,7 @@ $(function () {
             popupNote._workItemId = undefined;
             window.currentWorkItemId = undefined;
             $("#popupNoteContent").empty();
+            $('#Filter').submit();
         }
     }).dxPopup("instance");
 
@@ -147,14 +150,14 @@ $(function () {
         popupNote.show(workItemId);
     });
 
-    //// Expand/Collapse buttons
-    //$("#btnExpandAll").on("click", function () {
-    //    $(".task-card").addClass("expanded");
-    //});
+    // Expand/Collapse buttons
+    $("#btnExpandAll").on("click", function () {
+        $(".task-card").addClass("expanded");
+    });
 
-    //$("#btnCollapseAll").on("click", function () {
-    //    $(".task-card").removeClass("expanded");
-    //});
+    $("#btnCollapseAll").on("click", function () {
+        $(".task-card").removeClass("expanded");
+    });
 
     // Responsive layout changes
     $(window).on('resize', function () {
@@ -193,4 +196,3 @@ $(function () {
         );
     }
 });
-

@@ -106,7 +106,7 @@ namespace FrontEndDevExtreme.Controllers
             var result = await _workItemApiService.CreateAsync(model);
             if (result)
             {
-                return RedirectToAction("Index", "WorkItem");
+                return Json(new { success = true, message = "Tạo công việc thành công" });
             }
 
             return Json(new { success = false, message = "Tạo công việc thất bại. Vui lòng thử lại." });

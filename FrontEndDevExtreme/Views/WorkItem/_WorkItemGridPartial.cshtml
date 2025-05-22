@@ -19,14 +19,19 @@
         </div>
     </div>
     <div class="card-body p-0">
-        <div id="gridContainer">
+        <div id="gridContainer" class="drag-scroll-container" style="overflow: auto; cursor: grab;">
             @(Html.DevExtreme().DataGrid<FrontEndDevExtreme.Models.WorkItemViewModel>()
                     .ID("workItemGrid")
                     .DataSource(Model)
+
                     .ShowBorders(true)
+                    .OnContentReady("onGridContentReady")
                     .RowAlternationEnabled(true)
                     .WordWrapEnabled(true)
+                    .AllowColumnReordering(true)     
+                    .AllowColumnResizing(true)
                     .ColumnAutoWidth(true)
+                    .Scrolling(s => s.Mode(GridScrollingMode.Standard))
                     .ColumnMinWidth(100)
                     .HoverStateEnabled(true)
                     .Paging(p => p.PageSize(10))
@@ -270,6 +275,7 @@
 <div id="popupNote"></div>
 
 <script>
+
     var appUrls = {
         createPopUp: '@Url.Action("CreatePopUp", "WorkItem")',
         notePartial: '@Url.Action("NotePartial", "WorkItem")',
@@ -280,3 +286,61 @@
 <script src="~/js/create-workitem.js"></script>
 <script src="~/js/index.js"></script>
 <script src="~/js/note.js"></script>
+<script>
+    function onGridContentReady(e) {
+        // Lấy phần chứa dữ liệu để scroll
+        const rowsView = e.element.find(".dx-datagrid-rowsview")[0];
+        enableDragScroll(rowsView);
+    }
+
+    function enableDragScroll(container) {
+        let isDragging = false;
+        let startX, scrollLeft;
+
+        container.addEventListener("mousedown", function (e) {
+            isDragging = true;
+            container.classList.add("dragging");
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+
+        container.addEventListener("mouseleave", function () {
+            isDragging = false;
+            container.classList.remove("dragging");
+        });
+
+        container.addEventListener("mouseup", function () {
+            isDragging = false;
+            container.classList.remove("dragging");
+        });
+
+        container.addEventListener("mousemove", function (e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5; // tốc độ kéo
+            container.scrollLeft = scrollLeft - walk;
+        });
+
+        // Hỗ trợ thiết bị cảm ứng (nếu muốn)
+        let startTouchX;
+        let scrollStartLeft;
+
+        container.addEventListener("touchstart", function (e) {
+            startTouchX = e.touches[0].pageX;
+            scrollStartLeft = container.scrollLeft;
+        });
+
+        container.addEventListener("touchmove", function (e) {
+            const x = e.touches[0].pageX;
+            const walk = (x - startTouchX) * 1.5;
+            container.scrollLeft = scrollStartLeft - walk;
+        });
+    }
+</script>
+<style>
+    .dx-datagrid-rowsview.dragging {
+        cursor: grabbing !important;
+        user-select: none;
+    }
+</style>
