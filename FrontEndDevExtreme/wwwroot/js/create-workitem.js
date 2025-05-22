@@ -162,6 +162,45 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        $('#formCreateWorkItemPop').on('submit', function (e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const url = form.attr('action');
+            const data = form.serialize();
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (response) {
+                    Toastify({
+                        text: "Tạo công việc thành công!",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#28a745",
+                        close: true
+                    }).showToast();
+
+                    const popup = $("#popupCreateWorkItem").dxPopup("instance");
+                    popup.hide();
+
+                    $('#Filter').submit();
+                },
+                error: function (xhr) {
+                    Toastify({
+                        text: "Lỗi khi tạo công việc!",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                        close: true
+                    }).showToast();
+                }
+            });
+        });
     }
 
     function submitCreateForm($form) {
@@ -181,14 +220,15 @@
             success: function (response) {
                 if (response.success) {
                     DevExpress.ui.notify({
-                        message: "Tạo công việc thành công",
+                        message: response.message || "Tạo công việc thành công",
                         type: "success",
                         displayTime: 2000,
                         position: { at: "top center", my: "top center" }
                     });
-                    if (response.redirectUrl) {
-                        setTimeout(() => window.location.href = response.redirectUrl, 1000);
-                    }
+                    setTimeout(() => {
+                        $("#workItemCreatePopup").modal('hide'); 
+                         
+                    }, 1500);
                 } else {
                     DevExpress.ui.notify({
                         message: response.message || "Tạo công việc thất bại",
@@ -241,3 +281,4 @@
 
         initWorkItemCreate();
     });
+

@@ -44,6 +44,7 @@ function addNotePop() {
                 DevExpress.ui.notify("Đã thêm ghi chú", "success", 2000);
                 $textArea.option("value", "");
                 refreshNoteList(); // gọi lại để load ghi chú mới
+
             } else {
                 DevExpress.ui.notify(res.message || "Thêm ghi chú thất bại", "error", 2000);
             }
